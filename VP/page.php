@@ -60,7 +60,6 @@
 	$pic_file = $all_files[$pic_num];
 	// <img src = "pilt.jpg" alt = "Tallinna Ülikool">
 	$pic_html = '<img src = "' .$photo_dir .$pic_file .'" alt = "Tallinna Ülikool">';
-	//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
 ?>
 <!DOCTYPE html>
 <html lang="et">
