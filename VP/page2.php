@@ -1,4 +1,8 @@
 <?php
+	//alustame sessiooni
+	session_start();
+	require_once("fnc_user.php");
+	require_once("../../../config.php");
 	$author_name = "Kert Lillenberk";
 	$todays_evaluation = null; // $todays_evaluation="";
 	$inserted_adjective = null;
@@ -49,6 +53,11 @@
 		$photo_select_html .= '<option value="' .$i .'">' .$photo_files[$i] ."</option> \n";
 	}
 	$photo_select_html .= "</select> \n";
+	
+	//sisselogimine
+	if(isset($_POST["login_submit"])){
+		sign_in($_POST["email_input"], $_POST["password_input"]);
+	}
 ?>
 <!DOCTYPE html>
 <html lang="et">
@@ -62,6 +71,11 @@
 		<p><small>Loodetavasti saan serveriga ühendust</small></p>
 	</h1>
 	<hr>
+	<form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+		<input type="email" name="email_input" placeholder="email ehk kasutajatunnus">
+		<input type="password" name="password_input" placeholder="salasõna">
+		<input type="submit" name="login_submit" value="Logi sisse">
+	</hr>
 	<p>Loo endale <a href="add_user.php"> kasutajakonto </a></p>
 	</hr>
 	<form method="POST">

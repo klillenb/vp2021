@@ -1,5 +1,7 @@
 <?php
+	require_once("../../../config.php");
 	require_once("fnc_general.php");
+	require_once("fnc_user.php");
 	
 	$notice = null;
 	$name = null;
@@ -35,14 +37,16 @@
 			} else {
 				$name_error = "Palun sisesta eesnimi!";
 			}
+			
 			if(isset($_POST["surname_input"]) and !empty($_POST["surname_input"])){
-				$name = test_input(filter_var($_POST["surname_input"], FILTER_SANITIZE_STRING));
+				$surname = test_input(filter_var($_POST["surname_input"], FILTER_SANITIZE_STRING));
 				if(strlen($surname) < 1){
 					$surname_error = "Palun sisesta perekonnanimi!";
 				}
 			} else {
 				$surname_error = "Palun sisesta perekonnanimi!";
 			}
+			
 			if(isset($_POST["gender_input"]) and !empty($_POST["gender_input"])){
 				$gender = filter_var($_POST["gender_input"], FILTER_VALIDATE_INT);
 				if($gender != 1 and $gender != 2){
@@ -61,14 +65,16 @@
 			} else {
 				$birth_day_error = "Palun vali oma sünnipäev!";
 			}
+			
 			if(isset($_POST["birth_month_input"]) and !empty($_POST["birth_month_input"])){
 				$birth_month = filter_var($_POST["birth_month_input"], FILTER_VALIDATE_INT);
-				if($birth_month < 1 or $birth_day > 12){
+				if($birth_month < 1 or $birth_month > 12){
 					$birth_month_error = "Palun vali oma sünnikuu!";
 				}
 			} else {
 				$birth_month_error = "Palun vali oma sünnikuu!";
 			}
+			
 			if(isset($_POST["birth_year_input"]) and !empty($_POST["birth_year_input"])){
 				$birth_year = filter_var($_POST["birth_year_input"], FILTER_VALIDATE_INT);
 				if($birth_year < date("Y") - 110 or $birth_year > date("Y") - 13){
@@ -77,6 +83,18 @@
 			} else {
 				$birth_year_error = "Palun vali oma sünniaasta!";
 			}
+			
+			//valideerime kuupäeva ja paneme selle kokku
+			if(empty($birth_day_error) and empty($birth_month_error) and empty($birth_year_error)){
+				if(checkdate($birth_month, $birth_day, $birth_year)){
+					//moodustame kuupäeva
+					$temp_date = new DateTime($birth_year ."-" .$birth_month ."-" .$birth_day);
+					$birth_date = $temp_date->format("Y-m-d");
+				} else {
+					$birth_date_error = "Valitud kuupäev on vigane!";
+				}
+			}
+			
 			if(isset($_POST["email_input"]) and !empty($_POST["email_input"])){
 				$email = filter_var($_POST["email_input"], FILTER_VALIDATE_EMAIL);
 				if(strlen($email) < 5){
@@ -85,6 +103,7 @@
 			} else {
 				$email_error = "Palun sisesta e-posti aadress kasutajatunnuseks!";
 			}
+			
 			if(isset($_POST["password_input"]) and !empty($_POST["password_input"])){
 				if(strlen($_POST["password_input"]) < 8){
 					$password_error = "Salasõna on liiga lühike!";
@@ -92,6 +111,7 @@
 			} else {
 				$password_error = "Palun sisesta salasõna!";
 			}
+			
 			if(isset($_POST["confirm_password_input"]) and !empty($_POST["confirm_password_input"])){
 				if($_POST["confirm_password_input"] != $_POST["password_input"]){
 					$confirm_password_error = "Sisestatud salasõnad on erinevad!";
@@ -99,6 +119,14 @@
 			} else {
 				$confirm_password_error = "Palun sisesta salasõna kaks korda!";
 			}
+			
+			//kui vigu pole siis salvestame uue kasutaja
+			 
+			if(empty($name_error) and empty($surname_error) and empty($birth_month_error) and empty($birth_year_error) and empty($birth_day_error) and empty($birth_date_error) and empty($gender_error) and empty($email_error) and empty($password_error) and empty($confirm_password_error)){
+				$notice = store_new_user($name, $surname, $birth_date, $gender, $email, $_POST["password_input"]);
+				//echo "juhhei";
+			}
+		
 		}//if isset lõppeb
 	}//if request_method lõppeb
 
