@@ -11,6 +11,7 @@
 	$year_input_error = null;
 	$inserted_year = null;
 	$duration_input_error = null;
+	$inserted_duration = 60;
 	$genre_input_error = null;
 	$inserted_genre = null;
 	$director_input_error = null;
@@ -39,6 +40,8 @@
 			}
 			if ($_POST["duration_input"] <= 0){
 				$duration_input_error = "Sisesta korrektne kestus!";
+			} else {
+				$inserted_duration = $_POST["duration_input"];
 			}
 			if (empty($_POST["genre_input"])){
 				$genre_input_error = "Sisesta filmi žanr!";
@@ -80,7 +83,7 @@
 		<input type="number" name="year_input" id="year_input" value="<?php echo $inserted_year ?>"><?php echo $year_input_error?>
 		<br>
 		<label for="duration_input">Kestus</label>
-		<input type="number" name="duration_input" id="duration_input" min="1" value="60" max="600"><?php echo $duration_input_error?>
+		<input type="number" name="duration_input" id="duration_input" min="1" value="<?php echo $inserted_duration ?>" max="600"><?php echo $duration_input_error?>
 		<br>
 		<label for="genre_input">Filmi žanr</label>
 		<input type="text" name="genre_input" id="genre_input" placeholder="Filmi žanr" value="<?php echo $inserted_genre ?>"><?php echo $genre_input_error?>
