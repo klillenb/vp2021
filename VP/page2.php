@@ -62,6 +62,8 @@
 		<p><small>Loodetavasti saan serveriga ühendust</small></p>
 	</h1>
 	<hr>
+	<p>Loo endale <a href="add_user.php"> kasutajakonto </a></p>
+	</hr>
 	<form method="POST">
 		<input type="text" name="adjective_input" placeholder="omadussõna tänase kohta" value="<?php echo $inserted_adjective ?>">
 		<input type="submit" name="todays_adjective_input" value="Saada ära!">
