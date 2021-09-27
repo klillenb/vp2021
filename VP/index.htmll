@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Kert Lillenberk, veebiprogrammeerimine</title>
+	<meta charset="utf-8" lang="et">
+</head>
+<body>
+	<h1>Kert Lillenberk, veebiprogrammeerimine</h1>
+		<p>See veebileht tehti <a href="https://www.tlu.ee/dt">Tallinna Ülikooli Digitehnoloogiate instituudi</a> veebiprogrammeerimise tunnis ja <em>ei sisalda tõsiseltvõetavat sisu</em>!</p>
+		<p><small>Loodetavasti saan serveriga ühendust</small></p>
+		<img src="tlu_terra.jpg" alt="Tallinna Ülikooli Terra hoone" width="800" height="300">
+	<h2>Veebiprogrammeerimise tunnis õpime järgnevat:</h2>
+	<ul>
+	<li>PHP programmeerimiskeel</li>
+	<li>HTML programmeerimiskeel</li>
+	<li>SQL päringukeel</li>
+	<li>jne</li>
+	
+	
+</body>
+
+
+</html>
