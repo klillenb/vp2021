@@ -4,6 +4,10 @@
 	function store_new_user($name, $surname, $birth_date, $gender, $email, $password){
 		$conn = new mysqli($GLOBALS["server_host"], $GLOBALS["server_user_name"], $GLOBALS["server_password"], $GLOBALS["database"]);
 		$conn->set_charset("utf8");
+		$stmt = $conn->prepare("SELECT id FROM vp_users WHERE email = ?");
+		if($stmt->fetch()){
+			$notice = "Selle e-mailiga on kasutaja juba loodud!";
+		} else {
 		$stmt = $conn->prepare("INSERT INTO vp_users (firstname, lastname, birthdate, gender, email, password) VALUES(?,?,?,?,?,?)");
 		echo $conn->error;
 		//krüpteerime parooli
@@ -16,6 +20,7 @@
 			$notice = "Uus kasutaja edukalt loodud!";
 		} else {
 			$notice = "Uue kasutaja loomisel tekkis viga: " .$stmt->error;
+		}
 		}
 		
 		$stmt->close();
@@ -30,7 +35,7 @@
 		$stmt = $conn->prepare("SELECT id, firstname, lastname, password FROM vp_users WHERE email = ?");
 		echo $conn->error;
 		$stmt->bind_param("s", $email);
-		$stmt->bind-result($id_from_db, $firstname_from_db, $lastname_from_db, $password_from_db);
+		$stmt->bind_result($id_from_db, $firstname_from_db, $lastname_from_db, $password_from_db);
 		$stmt->execute();
 		if($stmt->fetch()){
 			//tuli vaste, kontrollime parooli

@@ -1,4 +1,8 @@
 <?php
+	session_start();
+	if(!isset($_SESSION["user_id"])){
+		header("Location: page2.php");
+	}
 	$author_name = "Kert Lillenberk";
 	require_once("../../../config.php");
 	//echo $server_host;

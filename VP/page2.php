@@ -2,11 +2,16 @@
 	//alustame sessiooni
 	session_start();
 	require_once("fnc_user.php");
+	require_once("fnc_general.php");
 	require_once("../../../config.php");
+	
 	$author_name = "Kert Lillenberk";
 	$todays_evaluation = null; // $todays_evaluation="";
 	$inserted_adjective = null;
 	$adjective_error = null;
+	
+	$inserted_email = null;
+	$login_error = null;
 	
 	//kontrollin kas on vajutatud Submit nuppu
 	if(isset($_POST["todays_adjective_input"])){
@@ -55,8 +60,19 @@
 	$photo_select_html .= "</select> \n";
 	
 	//sisselogimine
-	if(isset($_POST["login_submit"])){
+	if(isset($_POST["login_submit"])){		//and !empty($_POST["email_input"]) and !empty($_POST["password_input"])
+		if(!empty($_POST["email_input"]) and !empty($_POST["password_input"])){
+		
+		$inserted_email = test_input(filter_var($_POST["email_input"]), FILTER_SANITIZE_STRING);
+		
+		if(isset($_POST["password_input"]) and $_POST["password_input"] < 8){
+			$login_error = "Sisselogimine ebaõnnestus!";
+		}
+		
 		sign_in($_POST["email_input"], $_POST["password_input"]);
+		} else {
+			$login_error = "Sisselogimine ebaõnnestus!";
+		}
 	}
 ?>
 <!DOCTYPE html>
@@ -72,9 +88,11 @@
 	</h1>
 	<hr>
 	<form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
-		<input type="email" name="email_input" placeholder="email ehk kasutajatunnus">
+		<input type="email" name="email_input" placeholder="email ehk kasutajatunnus" value="<?php echo $inserted_email ?>">
 		<input type="password" name="password_input" placeholder="salasõna">
 		<input type="submit" name="login_submit" value="Logi sisse">
+		<span><?php echo $login_error?></span>
+		
 	</hr>
 	<p>Loo endale <a href="add_user.php"> kasutajakonto </a></p>
 	</hr>

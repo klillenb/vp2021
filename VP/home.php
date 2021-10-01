@@ -10,6 +10,14 @@
 		session_destroy();
 		header("Location: page2.php");
 	}
+	//filmide nimekiri
+	if(isset($_GET["list_films"])){
+		header("Location: list_films.php");
+	}
+	//filmide lisamine
+	if(isset($_GET["add_films"])){
+		header("Location: add_films.php");
+	}
 ?>
 <!DOCTYPE html>
 <html lang="et">
@@ -18,12 +26,14 @@
 	<meta charset="utf-8">
 </head>
 <body>
-	<h1><?php echo $author_name;?>, veebiprogrammeerimine</h1>
+	<h1><?php echo $_SESSION["first_name"] ." " .$_SESSION["last_name"]; ?>, veebiprogrammeerimine</h1>
 		<p>See veebileht tehti <a href="https://www.tlu.ee/dt">Tallinna Ülikooli Digitehnoloogiate instituudi</a> veebiprogrammeerimise tunnis ja <em>ei sisalda tõsiseltvõetavat sisu</em>!</p>
 		<p><small>Loodetavasti saan serveriga ühendust</small></p>
 	</h1>
 	<hr>
 	<ul>
+		<li><a href="?list_films=1">Filmide nimekiri</a></li>
+		<li><a href="?add_films=!">Filmide lisamine</a></li>
 		<li><a href="?logout=1">Logi välja</a></li>
 	</ul>
 	
