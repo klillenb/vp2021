@@ -1,5 +1,5 @@
 <?php
-	//alustame sessiooni
+		//alustame sessiooni
 	session_start();
 	//kas on sisselogitud
 	if(!isset($_SESSION["user_id"])){
@@ -18,6 +18,7 @@
 	if(isset($_GET["add_films"])){
 		header("Location: add_films.php");
 	}
+	require("page_header.php");
 ?>
 <!DOCTYPE html>
 <html lang="et">
@@ -33,7 +34,8 @@
 	<hr>
 	<ul>
 		<li><a href="?list_films=1">Filmide nimekiri</a></li>
-		<li><a href="?add_films=!">Filmide lisamine</a></li>
+		<li><a href="?add_films=1">Filmide lisamine</a></li>
+		<li><a href="user_profile.php">Kasutajaprofiil</a></li>
 		<li><a href="?logout=1">Logi välja</a></li>
 	</ul>
 	

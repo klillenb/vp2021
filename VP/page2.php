@@ -5,6 +5,7 @@
 	require_once("fnc_general.php");
 	require_once("../../../config.php");
 	
+	
 	$author_name = "Kert Lillenberk";
 	$todays_evaluation = null; // $todays_evaluation="";
 	$inserted_adjective = null;
@@ -84,6 +85,7 @@
 			$notice = $email_error ." " .$password_error;
 		}
     }
+
 ?>
 <!DOCTYPE html>
 <html lang="et">
@@ -98,10 +100,10 @@
 	</h1>
 	<hr>
 	<form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
-		<input type="email" name="email_input" placeholder="email ehk kasutajatunnus" value="<?php echo $inserted_email ?>">
+		<input type="email" name="email_input" placeholder="email ehk kasutajatunnus" value="<?php echo $email ?>">
 		<input type="password" name="password_input" placeholder="salasõna">
 		<input type="submit" name="login_submit" value="Logi sisse">
-		<span><?php echo $login_error?></span>
+		<span><?php echo $notice?></span>
 		
 	</hr>
 	<p>Loo endale <a href="add_user.php"> kasutajakonto </a></p>

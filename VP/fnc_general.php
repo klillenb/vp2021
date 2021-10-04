@@ -5,3 +5,4 @@
 		$data = trim($data);
 		return $data;
 	}
+	
