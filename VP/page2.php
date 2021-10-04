@@ -10,8 +10,10 @@
 	$inserted_adjective = null;
 	$adjective_error = null;
 	
-	$inserted_email = null;
-	$login_error = null;
+	$email = null;
+	$email_error = null;
+	$password_error = null;
+	$notice = null;
 	
 	//kontrollin kas on vajutatud Submit nuppu
 	if(isset($_POST["todays_adjective_input"])){
@@ -60,20 +62,28 @@
 	$photo_select_html .= "</select> \n";
 	
 	//sisselogimine
-	if(isset($_POST["login_submit"])){		//and !empty($_POST["email_input"]) and !empty($_POST["password_input"])
-		if(!empty($_POST["email_input"]) and !empty($_POST["password_input"])){
-		
-		$inserted_email = test_input(filter_var($_POST["email_input"]), FILTER_SANITIZE_STRING);
-		
-		if(isset($_POST["password_input"]) and $_POST["password_input"] < 8){
-			$login_error = "Sisselogimine ebaõnnestus!";
-		}
-		
-		sign_in($_POST["email_input"], $_POST["password_input"]);
+	if(isset($_POST["login_submit"])){
+		if(isset($_POST["email_input"]) and !empty($_POST["email_input"])){
+			$email = filter_var($_POST["email_input"], FILTER_VALIDATE_EMAIL);
+			if(strlen($email) < 5){
+				$email_error = "Palun sisesta kasutajatunnus (e-mail)!";
+			}
 		} else {
-			$login_error = "Sisselogimine ebaõnnestus!";
+			$email_error = "Palun sisesta kasutajatunnus (e-mail)!";
 		}
-	}
+		if(isset($_POST["password_input"]) and !empty($_POST["password_input"])){
+			if(strlen($_POST["password_input"]) < 8){
+				$password_error = "Sisestatud salasõna on liiga lühike!";
+			}
+		} else {
+			$password_error = "Palun sisesta salasõna!";
+		}
+		if(empty($email_error) and empty($password_error)){
+			$notice = sign_in($email, $_POST["password_input"]);
+		} else {
+			$notice = $email_error ." " .$password_error;
+		}
+    }
 ?>
 <!DOCTYPE html>
 <html lang="et">

@@ -5,22 +5,26 @@
 		$conn = new mysqli($GLOBALS["server_host"], $GLOBALS["server_user_name"], $GLOBALS["server_password"], $GLOBALS["database"]);
 		$conn->set_charset("utf8");
 		$stmt = $conn->prepare("SELECT id FROM vp_users WHERE email = ?");
+		$stmt->bind_param("s", $email);
+		$stmt->bind_result($id_from_db);
+		$stmt->execute();
 		if($stmt->fetch()){
-			$notice = "Selle e-mailiga on kasutaja juba loodud!";
+			$notice = "Sellise tunnusega (" .$email .") kasutaja on <strong>juba olemas</strong>!";
 		} else {
-		$stmt = $conn->prepare("INSERT INTO vp_users (firstname, lastname, birthdate, gender, email, password) VALUES(?,?,?,?,?,?)");
-		echo $conn->error;
-		//krüpteerime parooli
-		$option = ["cost" => 12];
-		$pwd_hash = password_hash($password, PASSWORD_BCRYPT, $option);
-		
-		$stmt->bind_param("sssiss", $name, $surname, $birth_date, $gender, $email, $pwd_hash);
-		$notice = null;
-		if($stmt->execute()){
-			$notice = "Uus kasutaja edukalt loodud!";
-		} else {
-			$notice = "Uue kasutaja loomisel tekkis viga: " .$stmt->error;
-		}
+			$stmt->close();
+			$stmt = $conn->prepare("INSERT INTO vp_users (firstname, lastname, birthdate, gender, email, password) VALUES(?,?,?,?,?,?)");
+			echo $conn->error;
+			//krüpteerime parooli
+			$option = ["cost" => 12];
+			$pwd_hash = password_hash($password, PASSWORD_BCRYPT, $option);
+			
+			$stmt->bind_param("sssiss", $name, $surname, $birth_date, $gender, $email, $pwd_hash);
+			$notice = null;
+			if($stmt->execute()){
+				$notice = "Uus kasutaja edukalt loodud!";
+			} else {
+				$notice = "Uue kasutaja loomisel tekkis viga: " .$stmt->error;
+			}
 		}
 		
 		$stmt->close();
