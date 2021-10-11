@@ -13,25 +13,56 @@
 	
 	require_once("../../../config.php");
 	require_once("fnc_general.php");
-	require_once("fnc_user.php");
+	require_once("fnc_movie.php");
 
-	$description = read_user_description();
 	$notice = null;
-	$profile_store = null;
-	//$user_profile = load_profile();
+	$selected_person = null;
+	$selected_movie = null;
+	$selected_position = null;
+	$role = null;
+	$person_in_movie_error = null;
+	
+	$selected_person_for_photo = null;
+	$photo_upload_notice = null;
+	
+	if(isset($_POST["person_in_movie_submit"])){
+		if(isset($_POST["person_input"]) and !empty($_POST["person_input"])){
+			$selected_person = filter_var($_POST["person_input"], FILTER_VALIDATE_INT);
+		} else {
+			$person_in_movie_error .= "Isik on valimata!";
+		}
+		
+		if(isset($_POST["movie_input"]) and !empty($_POST["movie_input"])){
+			$selected_movie = filter_var($_POST["movie_input"], FILTER_VALIDATE_INT);
+		} else {
+			$person_in_movie_error .= "Film on valimata!";
+		}
+		
+		if(isset($_POST["position_input"]) and !empty($_POST["position_input"])){
+			$selected_position = filter_var($_POST["position_input"], FILTER_VALIDATE_INT);
+		} else {
+			$person_in_movie_error .= "Isik on valimata!";
+		}
+		
+		 if(isset($_POST["role_input"]) and !empty($_POST["role_input"])){
+                $role = test_input(filter_var($_POST["role_input"], FILTER_SANITIZE_STRING));
+                if(empty($role)){
+                    $person_in_movie_error .= "Palun sisesta näitlejale normaalne rolli nimi!";
+					
+				}
+			} else {
+                $person_in_movie_error .= "Näitleja roll on sisestamata!";
+		}
+		if(empty($person_in_movie_error)){
+			$person_in_movie_error = store_person_in_movie($selected_person, $selected_movie, $selected_position, $role);
+        }
+	}
+	
+	if(isset($_POST["person_photo_submit"])){
+		var_dump($_POST);
+	}
 	
 	require("page_header.php");
-
-	
-	if(isset($_POST["profile_submit"])){
-		$description = test_input($_POST["description_input"]);
-		
-		$profile_store = store_new_profile($description, $_POST["bg_color_input"], $_POST["text_color_input"]);
-		$notice = "Salvestamine õnnestus!";
-		$notice = "Salvestamine ebaõnnestus!";
-		$_SESSION["bg_color"] = $_POST["bg_color_input"];
-		$_SESSION["text_color"] = $_POST["text_color_input"];
-	}
 ?>
 
 	<h1><?php echo $_SESSION["first_name"] ." " .$_SESSION["last_name"]; ?>, veebiprogrammeerimine</h1>
@@ -42,23 +73,44 @@
 		<li><a href="home.php">Avalehele</a></li>
 		<li><a href="?logout=1">Logi välja</a></li>
 	</ul>
-	</hr>
-	<h2>Kasutajaprofiil</h2>
+	<hr>
+	<h2>Filmi info seostamine</h2>
+	<h3>Film, inimene ja tema roll</h3>
 	<form method = "POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
-		<label for="description_input">Minu lühikirjeldus</label>
-		<br>
-		<textarea name="description_input" id="description_input" rows="10" cols="80" placeholder="Minu lühikirjeldus ..."><?php echo $description; ?></textarea>
-		<br>
-		<label for="bg_color_input">taustavärv</label>
-		<br>
-		<input type="color" name="bg_color_input" id="bg_color_input" value="<?php echo $_SESSION["bg_color"]; ?>">
-		<br>
-		<label for="text_color_input">tekstivärv</label>
-		<br>
-		<input type="color" name="text_color_input" id="text_color_input" value="<?php echo $_SESSION["text_color"]; ?>"> 
-		<br>
-		<input type="submit" name="profile_submit" value="Salvesta">
+		<label for="person_input">Isik</label>
+		<select name="person_input" id="person_input">
+			<option value="" selected disabled>Vali isik</option>
+			<?php echo read_all_person($selected_person);?>
+		</select>
+		<label for="movie_input">Film: </label>
+		<select name="movie_input" id="movie_input">
+			<option value="" selected disabled>Vali film</option>
+			<?php echo read_all_movies($selected_movie);?>
+		</select>
+		<label for="position_input">Amet: </label>
+		<select name="position_input" id="position_input">
+			<option value="" selected disabled>Vali amet: </option>
+			<?php echo read_all_positions($selected_position);?>
+		</select>
+		<label for="role_input"> Roll: </label>
+        <input type="text" name="role_input" id="role_input" placeholder="Tegelase nimi" value="<?php echo $role; ?>">
+		
+		<input type="submit" name="person_in_movie_submit" value="Salvesta">
 	</form>
+	<span><?php echo $person_in_movie_error; ?></span>
 	<span><?php echo $notice; ?></span>
+	<hr>
+	<h3>Filmitegelase foto</h3>
+	<form method = "POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" enctype="multipart/form-data">
+		<label for="person_for_photo_input">Isik</label>
+		<select name="person_for_photo_input" id="person_for_photo_input">
+			<option value="" selected disabled>Vali isik</option>
+			<?php echo read_all_person($selected_person_for_photo);?>
+		</select>
+		<label for="photo_input">Vali pildi fail!</label>
+		<input type="file" name="photo_input" id="photo_input">
+		<input type="submit" name="person_photo_submit" value="Lae pilt üles">
+	</form>
+	<span><?php echo $photo_upload_notice;?></span>
 </body>
 </html>

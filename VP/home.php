@@ -35,6 +35,7 @@
 	<ul>
 		<li><a href="?list_films=1">Filmide nimekiri</a></li>
 		<li><a href="?add_films=1">Filmide lisamine</a></li>
+		<li><a href="movie_relations.php">Filmi info seostamine</a></li>
 		<li><a href="user_profile.php">Kasutajaprofiil</a></li>
 		<li><a href="?logout=1">Logi välja</a></li>
 	</ul>
