@@ -24,42 +24,73 @@
 	
 	$selected_person_for_photo = null;
 	$photo_upload_notice = null;
+	$photo_dir = "movie_photos/";
 	
 	if(isset($_POST["person_in_movie_submit"])){
 		if(isset($_POST["person_input"]) and !empty($_POST["person_input"])){
 			$selected_person = filter_var($_POST["person_input"], FILTER_VALIDATE_INT);
 		} else {
-			$person_in_movie_error .= "Isik on valimata!";
+			$person_in_movie_error .= "Isik on valimata! ";
 		}
 		
 		if(isset($_POST["movie_input"]) and !empty($_POST["movie_input"])){
 			$selected_movie = filter_var($_POST["movie_input"], FILTER_VALIDATE_INT);
 		} else {
-			$person_in_movie_error .= "Film on valimata!";
+			$person_in_movie_error .= "Film on valimata! ";
 		}
 		
 		if(isset($_POST["position_input"]) and !empty($_POST["position_input"])){
 			$selected_position = filter_var($_POST["position_input"], FILTER_VALIDATE_INT);
 		} else {
-			$person_in_movie_error .= "Isik on valimata!";
+			$person_in_movie_error .= "Amet on valimata! ";
 		}
 		
-		 if(isset($_POST["role_input"]) and !empty($_POST["role_input"])){
+		 if($selected_position == 1){
+			 if(isset($_POST["role_input"]) and !empty($_POST["role_input"])){
                 $role = test_input(filter_var($_POST["role_input"], FILTER_SANITIZE_STRING));
                 if(empty($role)){
                     $person_in_movie_error .= "Palun sisesta näitlejale normaalne rolli nimi!";
-					
-				}
-			} else {
+                }
+            } else {
                 $person_in_movie_error .= "Näitleja roll on sisestamata!";
-		}
+            }
+        }
+
+
 		if(empty($person_in_movie_error)){
 			$person_in_movie_error = store_person_in_movie($selected_person, $selected_movie, $selected_position, $role);
         }
 	}
 	
+	$file_type = null;
+	$file_name = null;
+	
 	if(isset($_POST["person_photo_submit"])){
-		var_dump($_POST);
+		//var_dump($_POST);
+		$image_check = getimagesize($_FILES["photo_input"]["tmp_name"]);
+		if($image_check !== false){
+			if($image_check["mime"] == "image/jpeg"){
+				$file_type = "jpg";
+			}
+			if($image_check["mime"] == "image/png"){
+				$file_type = "png";
+			}
+			if($image_check["mime"] == "image/gif"){
+				$file_type = "gif";
+			}
+			
+			//teen ajatempli
+			$time_stamp = microtime(1) * 10000;
+			
+			//moodustan failinime (kasutaksin ees- ja perekonnanime aga praegu on meil vaid inimese id)
+			$file_name = read_person_name_for_filename($_POST["person_for_photo_input"]) ."_" ."$time_stamp" ."." .$file_type;
+			//kopeerime pildi originaalkujul, originaalnimega vajalikku kataloogi
+			if(move_uploaded_file($_FILES["photo_input"]["tmp_name"], $photo_dir .$file_name)){
+				$photo_upload_notice = store_person_photo($file_name, $_POST["person_for_photo_input"]);
+			} else {
+				$photo_upload_notice = "Foto üleslaadimine ei õnnestunud!";
+			}
+		}
 	}
 	
 	require("page_header.php");
