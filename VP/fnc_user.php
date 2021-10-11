@@ -115,4 +115,22 @@
 		return $notice;
 	}
 	
+	function read_user_description(){
+		//kui profiil on olemas, loeb kasutaja lühitutvustuse
+		$notice = null;
+		$conn = new mysqli($GLOBALS["server_host"], $GLOBALS["server_user_name"], $GLOBALS["server_password"], $GLOBALS["database"]);
+		//vaatame, kas on profiil olemas
+		$stmt = $conn->prepare("SELECT description FROM vp_userprofiles WHERE userid = ?");
+		echo $conn->error;
+		$stmt->bind_param("i", $_SESSION["user_id"]);
+		$stmt->bind_result($description_from_db);
+		$stmt->execute();
+		if($stmt->fetch()){
+			$notice = $description_from_db;
+		}
+		$stmt->close();
+		$conn->close();
+		return $notice;
+	}
+	
 ?>
