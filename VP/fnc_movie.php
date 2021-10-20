@@ -61,6 +61,25 @@
 		return $html;
 	}
 	
+	function read_all_genres($selected){
+		$html = null;
+		$conn = new mysqli($GLOBALS["server_host"], $GLOBALS["server_user_name"], $GLOBALS["server_password"], $GLOBALS["database"]);
+		$conn->set_charset("utf8");
+		$stmt = $conn->prepare("SELECT id, genre_name FROM genre");
+		$stmt->bind_result($id_from_db, $genre_from_db);
+		$stmt->execute();
+		while($stmt->fetch()){
+			$html .= '<option value="' .$id_from_db .'"';
+			if($selected == $id_from_db){
+				$html .= " selected";
+			}
+			$html .= ">" .$genre_from_db ."</option \n";
+		}
+		$stmt->close();
+		$conn->close();
+		return $html;
+	}
+	
     function store_person_in_movie($selected_person, $selected_movie, $selected_position, $role){
         $notice = null;
         $conn = new mysqli($GLOBALS["server_host"], $GLOBALS["server_user_name"], $GLOBALS["server_password"], $GLOBALS["database"]);
@@ -121,4 +140,77 @@
         return $notice;
 	}
 	
+	function store_movie_genre($selected_movie, $selected_genre){
+		$conn = new mysqli($GLOBALS["server_host"], $GLOBALS["server_user_name"], $GLOBALS["server_password"], $GLOBALS["database"]);
+        $conn->set_charset("utf8");
+		$stmt = $conn->prepare("SELECT id FROM movie_genre WHERE movie_id = ? AND genre_id = ?");
+		$stmt->bind_param("ii", $selected_movie, $selected_genre);
+		$stmt->bind_result($id_from_db);
+		$stmt->execute();
+		if($stmt->fetch){
+			$notice = "Selline seos on juba olemas!";
+		} else {
+			$stmt->close();
+			$stmt = $conn->prepare("INSERT INTO movie_genre (movie_id, genre_id) VALUES (?, ?)");
+			$stmt->bind_param("ii", $selected_movie, $selected_genre);
+			if($stmt->execute()){
+				$notice = "Uus seos edukalt salvestatud!";
+			} else {
+				$notice = "Salvestamisel tekkis viga: " .$stmt->error;
+			}
+		}
+		$stmt->close();
+		$conn->close();
+		return $notice;
+	}
+	
+	
+	function list_movie($selected_movie){
+		$conn = new mysqli($GLOBALS["server_host"], $GLOBALS["server_user_name"], $GLOBALS["server_password"], $GLOBALS["database"]);
+		$conn->set_charset("utf8");
+		$stmt = $conn->prepare("SELECT title, production_year, duration, description FROM movie WHERE id = ?");
+		$stmt->bind_param("i", $selected_movie);
+		$stmt->bind_result($title_from_db, $year_from_db, $duration_from_db, $description_from_db);
+		$stmt->execute();
+		$movie_html = null;
+		$duration = null;
+		$duration_h = null;
+		$duration_min = null;
+		if($stmt->fetch()){
+			$movie_html .= "<h3>" .$title_from_db ."</h3> \n";
+			$movie_html .= "<ul> \n";
+			$movie_html .= "<li> Valmimisaasta: " .$year_from_db ."</li> \n";
+			if($duration_from_db < 60){
+				$duration .= $duration_from_db ." minutit";
+			} else {
+				if($duration_from_db > 120){
+					$duration_h = 2;
+				} else {
+					$duration_h = 1;
+				}
+				$duration .= $duration_h ." h ";
+				$duration_min = $duration_from_db - 60;
+				$duration .= $duration_min ." minutit";
+			}
+			$movie_html .= "<li> Kestus: " .$duration ."</li> \n";
+			$movie_html .= "<li> Kirjeldus: " .$description_from_db ."</li> \n";
+			$stmt->close();
+			$stmt = $conn->prepare("SELECT g.genre_name FROM movie_genre AS mg JOIN genre AS g ON g.id = mg.genre_id WHERE movie_id = ?");
+			$stmt->bind_param("i", $selected_movie);
+			$stmt->bind_result($genre_from_db);
+			$stmt->execute();
+			$movie_html .= "<li> Žanr(id):</li> \n";
+			$movie_html .= "</ul> \n";
+			$movie_html .= "<ol> \n";
+			while($stmt->fetch()){
+				$movie_html .= "<li>" .$genre_from_db ."</li> \n";
+			}
+			$movie_html .= "</ol> \n";
+		} else {
+			$movie_html = "Tekkis viga: " .$stmt->error;
+		}
+		$stmt->close();
+		$conn->close();
+		return $movie_html;
+	}
 	

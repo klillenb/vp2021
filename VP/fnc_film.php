@@ -1,6 +1,7 @@
 <?php
 	$database = "if21_kert_lil";
 	
+	
 	function read_all_films(){
 		//avan andmebaasi ühenduse		server, kasutaja, parool, andmebaas
 		$conn = new mysqli($GLOBALS["server_host"], $GLOBALS["server_user_name"], $GLOBALS["server_password"], $GLOBALS["database"]);
@@ -20,14 +21,16 @@
 		//...
 		//</ul>
 		$films_html = null;
+		
 		//while(tingimus){
 			//mida teha...
 		//}
+		
 		while($stmt->fetch()){
 			$films_html .= "<h3>" .$title_from_db ."</h3> \n";
 			$films_html .= "<ul> \n";
 			$films_html .= "<li> Valmimisaasta: " .$year_from_db ."</li> \n";
-			$films_html .= "<li> Kestus: " .$duration_from_db ."</li> \n";
+			$films_html .= "<li> Kestus: " .$duration_from_db ." minutit</li> \n";
 			$films_html .= "<li> Žanr: " .$genre_from_db ."</li> \n";
 			$films_html .= "<li> Lavastaja: " .$director_from_db ."</li> \n";
 			$films_html .= "<li> tootja: " .$studio_from_db ."</li> \n";

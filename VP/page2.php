@@ -28,7 +28,7 @@
 		}
 	}
 	//var_dump($_POST);
-
+	$pic_num = null;
 	$photo_dir = "photos/";
 	$allowed_photo_types = ["image/jpeg", "image/png"];
 	$all_files = array_slice(scandir($photo_dir), 2);
@@ -44,13 +44,21 @@
 	
 	$limit = count($all_files);
 	$pic_num = mt_rand(0, $limit - 1);
-	$pic_file = $all_files[$pic_num];
+	
+	if(isset($_POST["photo_select_submit"])){
+		$pic_num = $_POST["photo_select"];
+	}
+	
+	$pic_file_html = null;
+	$pic_file = $photo_files[$pic_num];
 	$pic_html = '<img src = "' .$photo_dir .$pic_file .'" alt = "Tallinna Ülikool">';
+	
+	$pic_file_html = "\n <p>".$pic_file ."</p> \n";
 	
 	//fotode nimekiri
 	//<p>valida on järgmised fotod: <strong>foto1.jpg</strong>, <strong>foto2.jpg</strong>, <strong>foto33.jpg</strong>.</p>
 	//<ul>valida on järgmised fotod: <li>foto1.jpg</li>, <li>foto2.jpg</li>, <li>foto33.jpg</li></ul>
-	$list_html = "<ul>";
+	$list_html = "<ul> \n";
 	for($i = 0; $i < $limit; $i ++){
 		$list_html .= "<li>" .$photo_files[$i] ."</li>";
 	}
@@ -58,9 +66,13 @@
 	
 	$photo_select_html = '<select name="photo_select">' ."\n";
 	for($i = 0; $i < $limit; $i ++){
-		$photo_select_html .= '<option value="' .$i .'">' .$photo_files[$i] ."</option> \n";
+		$photo_select_html .= "\t \t \t" .'<option value="' .$i .'"';
+		if($i == $pic_num){
+			$photo_select_html .= " selected";
+		}
+		$photo_select_html .= ">" .$photo_files[$i] ."</option> \n";
 	}
-	$photo_select_html .= "</select> \n";
+	$photo_select_html .= "\t \t </select> \n";
 	
 	//sisselogimine
 	if(isset($_POST["login_submit"])){
@@ -120,6 +132,7 @@
 		?>
 		<form method="POST">
 			<?php echo $photo_select_html; ?>
+			<input type="submit" name="photo_select_submit" value="Näita valitud fotot">
 		</form>
 		<?php
 		echo $pic_html; 

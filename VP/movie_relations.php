@@ -19,12 +19,15 @@
 	$selected_person = null;
 	$selected_movie = null;
 	$selected_position = null;
+	$selected_genre = null;
 	$role = null;
 	$person_in_movie_error = null;
 	
 	$selected_person_for_photo = null;
 	$photo_upload_notice = null;
 	$photo_dir = "movie_photos/";
+	
+	$genre_notice = null;
 	
 	if(isset($_POST["person_in_movie_submit"])){
 		if(isset($_POST["person_input"]) and !empty($_POST["person_input"])){
@@ -93,6 +96,23 @@
 		}
 	}
 	
+	if(isset($_POST["genre_submit"])){
+		if(isset($_POST["movie_input"]) and !empty($_POST["movie_input"])){
+			$selected_genre = filter_var($_POST["movie_input"], FILTER_VALIDATE_INT);
+		} else {
+			$genre_notice .= "Film on valimata! ";
+		}
+		
+		if(isset($_POST["genre_input"]) and !empty($_POST["genre_input"])){
+			$selected_genre = filter_var($_POST["genre_input"], FILTER_VALIDATE_INT);
+		} else {
+			$genre_notice .= "Žanr on valimata! ";
+		}
+		if(empty($genre_notice)){
+			$genre_notice = store_movie_genre($selected_movie, $selected_genre);
+		}
+	}
+	
 	require("page_header.php");
 ?>
 
@@ -113,16 +133,19 @@
 			<option value="" selected disabled>Vali isik</option>
 			<?php echo read_all_person($selected_person);?>
 		</select>
+		
 		<label for="movie_input">Film: </label>
 		<select name="movie_input" id="movie_input">
 			<option value="" selected disabled>Vali film</option>
 			<?php echo read_all_movies($selected_movie);?>
 		</select>
+		
 		<label for="position_input">Amet: </label>
 		<select name="position_input" id="position_input">
 			<option value="" selected disabled>Vali amet: </option>
 			<?php echo read_all_positions($selected_position);?>
 		</select>
+		
 		<label for="role_input"> Roll: </label>
         <input type="text" name="role_input" id="role_input" placeholder="Tegelase nimi" value="<?php echo $role; ?>">
 		
@@ -131,6 +154,7 @@
 	<span><?php echo $person_in_movie_error; ?></span>
 	<span><?php echo $notice; ?></span>
 	<hr>
+	
 	<h3>Filmitegelase foto</h3>
 	<form method = "POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" enctype="multipart/form-data">
 		<label for="person_for_photo_input">Isik</label>
@@ -143,5 +167,24 @@
 		<input type="submit" name="person_photo_submit" value="Lae pilt üles">
 	</form>
 	<span><?php echo $photo_upload_notice;?></span>
+	<hr>
+	
+	<h3>Žanri lisamine filmile</h3>
+	<form method= "POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+		<label for="movie_input">Film: </label>
+		<select name="movie_input" id="movie_input">
+			<option value="" selected disabled>Vali film</option>
+			<?php echo read_all_movies($selected_movie);?>
+		</select>
+		
+		<label for="genre_input">Žanr: </label>
+		<select name="genre_input" id="genre_input">
+			<option value="" selected disabled>Vali žanr</option>
+			<?php echo read_all_genres($selected_genre);?>
+		</select>
+		
+		<input type="submit" name="genre_submit" value="Salvesta">
+	</form>
+	<span><?php echo $genre_notice;?></span>
 </body>
 </html>
