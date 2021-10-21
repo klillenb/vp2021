@@ -73,7 +73,7 @@
 			if($selected == $id_from_db){
 				$html .= " selected";
 			}
-			$html .= ">" .$genre_from_db ."</option \n";
+			$html .= ">" .$genre_from_db ."</option> \n";
 		}
 		$stmt->close();
 		$conn->close();
@@ -147,7 +147,7 @@
 		$stmt->bind_param("ii", $selected_movie, $selected_genre);
 		$stmt->bind_result($id_from_db);
 		$stmt->execute();
-		if($stmt->fetch){
+		if($stmt->fetch()){
 			$notice = "Selline seos on juba olemas!";
 		} else {
 			$stmt->close();
