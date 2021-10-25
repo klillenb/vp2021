@@ -36,7 +36,7 @@
 		<li><a href="?logout=1">Logi välja</a></li>
 	</ul>
 	<hr>
-	<h2>Eesti filmide valik</h2>
+	<h2>Eesti filmide informatsioon</h2>
 	<form method = "POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
 		<label for="movie_input">Film</label>
 		<select name="movie_input" id="movie_input">

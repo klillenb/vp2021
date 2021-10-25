@@ -37,10 +37,11 @@
 	</h1>
 	<hr>
 	<ul>
-		<li><a href="?list_films=1">Filmide nimekiri</a></li>
-		<li><a href="?list_movies=1">Filmide nimekiri (parem versioon)</a></li>
+		<li><a href="?list_films=1">Filmide nimekiri (versioon 0)</a></li>
+		<li><a href="?list_movies=1">Filmide nimekiri (versioon 1)</a></li>
 		<li><a href="?add_films=1">Filmide lisamine</a></li>
 		<li><a href="movie_relations.php">Filmi info seostamine</a></li>
+		<li><a href="gallery_photo_upload.php">Fotode üleslaadimine</a></li>
 		<li><a href="user_profile.php">Kasutajaprofiil</a></li>
 		<li><a href="?logout=1">Logi välja</a></li>
 	</ul>
