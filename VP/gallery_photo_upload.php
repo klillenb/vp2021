@@ -16,9 +16,6 @@
 	require_once("fnc_photo_upload.php");
 
 	$photo_upload_notice = null;
-	$photo_orig_upload_dir = "./upload_photos_orig/";
-	$photo_normal_upload_dir = "./upload_photos_normal/";
-	$photo_thumbnail_upload_dir = "./upload_photos_thumbnails/";
 
 	$photo_error = null;
 	$alt_text = null;
@@ -28,6 +25,10 @@
 	$photo_filename_prefix = "vp_";
 	$photo_upload_size_limit = 1024 * 1024;
 	$photo_size_ratio = 1;
+	$normal_photo_max_height = 400;
+	$normal_photo_max_width = 600;
+	$thumbnail_width = $thumbnail_height = 100;
+	$watermark_file = "./pics/vp_logo_w100_overlay.png";
 	
 	
 	if(isset($_POST["photo_submit"])){
@@ -62,6 +63,13 @@
 					$photo_error .= "Alternatiivtekst on lisamata!";
                 }
             }
+			
+			if(isset($_POST["privacy_input"]) and !empty($_POST["privacy_input"])){
+				$privacy = filter_var($_POST["privacy_input"], FILTER_VALIDATE_INT);
+			}
+			if(empty($privacy)){
+				$photo_error .= " Privaatsus on määramata!";
+			}
         
 			
 			if(empty($photo_error)){
@@ -82,11 +90,18 @@
 					$my_temp_image = imagecreatefromgif($_FILES["photo_input"]["tmp_name"]);
 				}
 
-				$my_new_temp_image = resize_image($my_temp_image);
+				$my_new_temp_image = resize_image($my_temp_image, $normal_photo_max_width, $normal_photo_max_height);
 				
-				$photo_upload_notice = save_image($my_new_temp_image, $file_type, $photo_normal_upload_dir .$file_name);
-				$photo_upload_notice = save_image_to_db($file_name, $alt_text, $_POST["privacy_input"]);
+				add_watermark($my_new_temp_image, $watermark_file);
+				
+				$photo_upload_notice = "Vähendatud pildi " .save_image($my_new_temp_image, $file_type, $photo_normal_upload_dir .$file_name);
+				//$photo_upload_notice = save_image_to_db($file_name, $alt_text, $_POST["privacy_input"]);
 				imagedestroy($my_new_temp_image);
+				
+				//teen pisipildi
+				$my_new_temp_image = resize_image($my_temp_image, $thumbnail_width, $thumbnail_height, false);
+                $photo_upload_notice .= " Pisipildi " .save_image($my_new_temp_image, $file_type, $photo_thumbnail_upload_dir .$file_name);
+                imagedestroy($my_new_temp_image);
 				
 				
 				//kopeerime pildi originaalkujul, originaalnimega vajalikku kataloogi
@@ -95,12 +110,17 @@
 				} else {
 					$photo_upload_notice .= " Foto üleslaadimine ei õnnestunud!";
 				}
+				
+				$photo_upload_notice .= " " .save_image_to_db($file_name, $alt_text, $privacy);
+				$alt_text = null;
+				$privacy = 1;
 			}
 		} else {
 			$photo_error = "Pildifaili pole valitud!";
 		}
-		echo $photo_error;
+		if(empty($photo_upload_notice)){
 		$photo_upload_notice = $photo_error;
+		}
 	}
 	
 	require("page_header.php");

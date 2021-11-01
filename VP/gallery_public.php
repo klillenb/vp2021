@@ -1,5 +1,5 @@
 <?php
-		//alustame sessiooni
+	//alustame sessiooni
 	session_start();
 	//kas on sisselogitud
 	if(!isset($_SESSION["user_id"])){
@@ -10,18 +10,9 @@
 		session_destroy();
 		header("Location: page2.php");
 	}
-	//filmide nimekiri
-	if(isset($_GET["list_films"])){
-		header("Location: list_films.php");
-	}
+	require_once("fnc_gallery.php");
+	require_once("../../../config.php");
 	
-	if(isset($_GET["list_movies"])){
-		header("Location: list_movies.php");
-	}
-	//filmide lisamine
-	if(isset($_GET["add_films"])){
-		header("Location: add_films.php");
-	}
 	require("page_header.php");
 ?>
 <!DOCTYPE html>
@@ -37,13 +28,7 @@
 	</h1>
 	<hr>
 	<ul>
-		<li><a href="?list_films=1">Filmide nimekiri (versioon 0)</a></li>
-		<li><a href="?list_movies=1">Filmide nimekiri (versioon 1)</a></li>
-		<li><a href="?add_films=1">Filmide lisamine</a></li>
-		<li><a href="movie_relations.php">Filmi info seostamine</a></li>
-		<li><a href="gallery_photo_upload.php">Fotode üleslaadimine</a></li>
-		<li><a href="gallery_public.php">Sisselogitud kasutajate jaoks fotode gallerii</a></li>
-		<li><a href="user_profile.php">Kasutajaprofiil</a></li>
+		<li><a href="home.php">Avalehele</a></li>
 		<li><a href="?logout=1">Logi välja</a></li>
 	</ul>
 	

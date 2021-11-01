@@ -29,40 +29,65 @@
 	}
 	
 	
-	function resize_image($my_temp_image){
-		$watermark_file = "./pics/vp_logo_w100_overlay.png";
-		$normal_photo_max_width = 600;
-		$normal_photo_max_height = 400;
-		//otsustame, kas tuleb laiuse või kõrguse järgi suhe
-		//kõigepealt pildi mõõdud
-		$image_width = imagesx($my_temp_image);
-		$image_height = imagesy($my_temp_image);
-		if($image_width / $normal_photo_max_width > $image_height / $normal_photo_max_height){
-			$photo_size_ratio = $image_width / $normal_photo_max_width;
-		} else {
-			$photo_size_ratio = $image_height / $normal_photo_max_height;
+	function resize_image($my_temp_image, $width, $height, $keep_orig_proportion = true){
+		$image_w = imagesx($my_temp_image);
+		$image_h = imagesy($my_temp_image);
+		$new_w = $width;
+		$new_h = $height;
+		$cut_x = 0;
+		$cut_y = 0;
+		$cut_size_w = $image_w;
+		$cut_size_h = $image_h;
+
+		if($width == $height){
+			if($image_w > $image_h){
+				$cut_size_w = $image_h;
+				$cut_x = round(($image_w - $cut_size_w) / 2);
+			} else {
+				$cut_size_h = $image_w;
+				$cut_y = round(($image_h - $cut_size_h) / 2);
+			}	
+		} elseif($keep_orig_proportion){//kui tuleb originaaproportsioone säilitada
+			if($image_w / $width > $image_h / $height){
+				$new_h = round($image_h / ($image_w / $width));
+			} else {
+				$new_w = round($image_w / ($image_h / $height));
+			}
+		} else { //kui on vaja kindlasti etteantud suurust, ehk pisut ka kärpida
+			if($image_w / $width < $image_h / $height){
+				$cut_size_h = round($image_w / $width * $height);
+				$cut_y = round(($image_h - $cut_size_h) / 2);
+			} else {
+				$cut_size_w = round($image_h / $height * $width);
+				$cut_x = round(($image_w - $cut_size_w) / 2);
+			}
 		}
-				
-		//arvutame uue laiuse ja kõrguse
-		$new_width = round($image_width / $photo_size_ratio);
-		$new_height = round($image_height / $photo_size_ratio);
+		
 		//loome uue pikslikogumi
-		$my_new_temp_image = imagecreatetruecolor($new_width, $new_height);
+		$my_new_temp_image = imagecreatetruecolor($new_w, $new_h);
+		//säilitame png piltide puhul läbipasitvuse
+		imagesavealpha($my_new_temp_image, true);
+		$trans_color = imagecolorallocatealpha($my_new_temp_image, 0, 0, 0, 127);
+		imagefill($my_new_temp_image, 0, 0, $trans_color);
+		
 		//kopeerime vajalikud pikslid uude objekti
-		imagecopyresampled($my_new_temp_image, $my_temp_image, 0, 0, 0, 0, $new_width, $new_height, $image_width, $image_height);
+		imagecopyresampled($my_new_temp_image, $my_temp_image, 0, 0, $cut_x, $cut_y, $new_w, $new_h, $cut_size_w, $cut_size_h);
 				
+		return $my_new_temp_image;
+	}
+	
+	function add_watermark($my_new_temp_image, $watermark_file){
 		//lisan vesimärgi
 		$watermark = imagecreatefrompng($watermark_file);
 		$watermark_width = imagesx($watermark);
 		$watermark_height = imagesy($watermark);
-		$watermark_x = $new_width - $watermark_width - 10;
-		$watermark_y = $new_height - $watermark_height - 10;
+		$watermark_x = imagesx($my_new_temp_image) - $watermark_width - 10;
+		$watermark_y = imagesy($my_new_temp_image) - $watermark_height - 10;
 		imagecopy($my_new_temp_image, $watermark, $watermark_x, $watermark_y, 0, 0, $watermark_width, $watermark_height);
 		imagedestroy($watermark);
-		imagedestroy($my_temp_image);
 		
-		return $my_new_temp_image;
 	}
+
 	
 	function save_image_to_db($file_name, $alt_text){
 		$conn = new mysqli($GLOBALS["server_host"], $GLOBALS["server_user_name"], $GLOBALS["server_password"], $GLOBALS["database"]);

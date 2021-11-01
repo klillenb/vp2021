@@ -4,6 +4,7 @@
 	require_once("fnc_user.php");
 	require_once("fnc_general.php");
 	require_once("../../../config.php");
+	require_once("fnc_gallery.php");
 	
 	
 	$author_name = "Kert Lillenberk";
@@ -127,16 +128,18 @@
 	</form>
 	<hr>
 	<?php
-		echo $todays_evaluation;
+	echo $todays_evaluation;
 		
-		?>
-		<form method="POST">
-			<?php echo $photo_select_html; ?>
-			<input type="submit" name="photo_select_submit" value="Näita valitud fotot">
-		</form>
-		<?php
-		echo $pic_html; 
-		echo $list_html;
+	?>
+	<hr>
+	<?php echo show_latest_public_photo();?>
+	<form method="POST">
+	<?php echo $photo_select_html; ?>
+		<input type="submit" name="photo_select_submit" value="Näita valitud fotot">
+	</form>
+	<?php
+	echo $pic_html; 
+	echo $list_html;
 	?>
 </body>
 
