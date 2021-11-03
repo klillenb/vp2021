@@ -12,14 +12,35 @@
 	}
 	require_once("fnc_gallery.php");
 	require_once("../../../config.php");
+	require_once("fnc_general.php");
+	
+	$update_photo_notice = null;
 	
 	if(isset($_GET["photo"]) and !empty($_GET["photo"])){
 		//loeme pildi ja teeme vormi kuhu loeme pildi andmed
+		$alt_text = show_photo_alttext();
+		$privacy = show_photo_privacy();
+		if(isset($_POST["photo_submit"])){
+			if(!empty($_POST["alt_input"]) and !empty($_POST["privacy_input"])){
+				$alt_text = test_input(filter_var($_POST["alt_input"]), FILTER_SANITIZE_STRING);
+				$update_photo_notice = update_photo_data($alt_text, $_POST["privacy_input"]);
+			} else {
+				$update_photo_notice = "Pildiandmete uuendamine ebaõnnestus!";
+			}
+		}
 	} else {
 		//tagasi eelmisena vaadatud lehele
-		header("Location: home.php");
+		header("Location: gallery_home.php");
 	}
 	
+	/*if(isset($_POST["photo_submit"])){
+		if(!empty($_POST["alt_input"]) and !empty($_POST["privacy_input"])){
+			$alt_text = test_input(filter_var($_POST["alt_input"]), FILTER_SANITIZE_STRING);
+			$update_photo_notice = update_photo_data($alt_text, $_POST["privacy_input"]);
+		} else {
+			$update_photo_notice = "Pildiandmete uuendamine ebaõnnestus!";
+		}
+	}*/
 	//SET deleted = NOW()
 	require("page_header.php");
 ?>
@@ -50,7 +71,8 @@
 		<input type="radio" name="privacy_input" id="privacy_input_3" value="3" <?php if($privacy == 3){echo " checked"; }?>>
 		<label for="privacy_input_3">Avalik (kõik näevad)</label>
 		<br>
-		<input type="submit" name="photo_submit" value="Lae pilt üles">
+		<input type="submit" name="photo_submit" value="Uuenda pildi andmeid">
 	</form>
+	<?php echo $update_photo_notice; ?>
 </body>
 </html>

@@ -167,10 +167,64 @@
 		if(empty($photo_html)){
 			$photo_html = "<p>Kahjuks avalikke fotosid üles laetud pole!</p> \n";
 		}
-		
 		$stmt->close();
 		$conn->close();
 		return $photo_html;
 	}
 
+	function show_photo_alttext(){
+		$alt_text = null;
+		$conn = new mysqli($GLOBALS["server_host"], $GLOBALS["server_user_name"], $GLOBALS["server_password"], $GLOBALS["database"]);
+		$conn->set_charset("utf8");
+		$stmt = $conn->prepare("SELECT alttext FROM vp_photos WHERE id = ? AND userid = ? AND deleted IS NULL");
+		echo $stmt->error;
+		$stmt->bind_param("ii", $_GET["photo"], $_SESSION["user_id"]);
+		$stmt->bind_result($alttext_from_db);
+		$stmt->execute();
+		if($stmt->fetch()){
+			$alt_text = $alttext_from_db;
+		} else {
+			$alt_text = "Üleslaetud foto";
+		}
+		$stmt->close();
+		$conn->close();
+		return $alt_text;
+	}
+	
+	function show_photo_privacy(){
+		$privacy = null;
+		$conn = new mysqli($GLOBALS["server_host"], $GLOBALS["server_user_name"], $GLOBALS["server_password"], $GLOBALS["database"]);
+		$conn->set_charset("utf8");
+		$stmt = $conn->prepare("SELECT privacy FROM vp_photos WHERE id = ? AND userid = ? AND deleted IS NULL");
+		echo $stmt->error;
+		$stmt->bind_param("ii", $_GET["photo"], $_SESSION["user_id"]);
+		$stmt->bind_result($privacy_from_db);
+		$stmt->execute();
+		if($stmt->fetch()){
+			$privacy = $privacy_from_db;
+		} else {
+			$privacy = "Tekkis viga: " .$stmt->error;
+		}
+		$stmt->close();
+		$conn->close();
+		return $privacy;
+	}
+	
+	function update_photo_data($alt_text, $privacy){
+		$notice = null;
+		$conn = new mysqli($GLOBALS["server_host"], $GLOBALS["server_user_name"], $GLOBALS["server_password"], $GLOBALS["database"]);
+		$conn->set_charset("utf8");
+		$stmt = $conn->prepare("UPDATE vp_photos SET alttext = ?, privacy = ? WHERE id = ? AND userid = ? AND deleted IS NULL");
+		echo $conn->error;
+		$stmt->bind_param("siii", $alt_text, $privacy, $_GET["photo"], $_SESSION["user_id"]);
+		echo $stmt->error;
+		if($stmt->execute()){
+			$notice = "Edukalt salvestatud!";
+		} else {
+			$notice = "Salvestamisel tekkis viga!" .$stmt->error;
+		}
+		$stmt->close();
+		$conn->close();
+		return $notice;
+	}
 ?>
