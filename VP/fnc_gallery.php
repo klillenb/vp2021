@@ -1,6 +1,7 @@
 <?php
 	$database = "if21_kert_lil";
 	require_once("../../../config.php");
+	require_once("fnc_general.php");
 	
 	function show_latest_public_photo(){
 		$photo_html = null;
@@ -65,9 +66,9 @@
 		$skip = ($page - 1) * $page_limit;
 		$conn = new mysqli($GLOBALS["server_host"], $GLOBALS["server_user_name"], $GLOBALS["server_password"], $GLOBALS["database"]);
 		$conn->set_charset("utf8");
-		$stmt = $conn->prepare("SELECT filename, alttext FROM vp_photos WHERE privacy >= ? AND deleted IS NULL ORDER BY id DESC LIMIT ?,?");
+		$stmt = $conn->prepare("SELECT filename, alttext, created FROM vp_photos WHERE privacy >= ? AND deleted IS NULL ORDER BY id DESC LIMIT ?,?");
 		$stmt->bind_param("iii", $privacy, $skip, $page_limit);
-		$stmt->bind_result($filename_from_db, $alttext_from_db);
+		$stmt->bind_result($filename_from_db, $alttext_from_db, $date);
 		$stmt->execute();
 		while($stmt->fetch()){
 			//<div class="thumbgallery">
@@ -81,8 +82,8 @@
 				$gallery_html .= $alttext_from_db;
 			}
 			$gallery_html .= '" class="thumbs">' ."\n";
+			$gallery_html .= "<p>" .date_to_est_format($date) ."</p>";
 			$gallery_html .= "</div> \n";
-
 		}
 		if(empty($gallery_html)){
 			$gallery_html = "<p>Kahjuks avalikke fotosid üles laetud pole!</p> \n";
@@ -98,9 +99,9 @@
 		$skip = ($page - 1) * $page_limit;
 		$conn = new mysqli($GLOBALS["server_host"], $GLOBALS["server_user_name"], $GLOBALS["server_password"], $GLOBALS["database"]);
 		$conn->set_charset("utf8");
-		$stmt = $conn->prepare("SELECT id, filename, alttext FROM vp_photos WHERE userid = ? AND deleted IS NULL ORDER BY id DESC LIMIT ?,?");
+		$stmt = $conn->prepare("SELECT id, filename, alttext, created FROM vp_photos WHERE userid = ? AND deleted IS NULL ORDER BY id DESC LIMIT ?,?");
 		$stmt->bind_param("iii", $_SESSION["user_id"], $skip, $page_limit);
-		$stmt->bind_result($id_from_db, $filename_from_db, $alttext_from_db);
+		$stmt->bind_result($id_from_db, $filename_from_db, $alttext_from_db, $date);
 		$stmt->execute();
 		while($stmt->fetch()){
 			//<div class="thumbgallery">
@@ -116,6 +117,7 @@
 			}
 			$gallery_html .= '" class="thumbs">' ."\n";
 			$gallery_html .= "</a> \n";
+			$gallery_html .= "<p>" .date_to_est_format($date) ."</p>";
 			$gallery_html .= "</div> \n";
 
 		}
@@ -151,7 +153,7 @@
 		$conn->set_charset("utf8");
 		$stmt = $conn->prepare("SELECT filename, alttext, privacy FROM vp_photos WHERE id = ? AND userid = ? AND deleted IS NULL");
 		echo $conn->error;
-		$stmt->bind_param("ii", $_GET["photo"], $_SESSION["user_id"]);
+		$stmt->bind_param("ii", $_SESSION["photo"], $_SESSION["user_id"]);
 		$stmt->bind_result($filename_from_db, $alttext_from_db, $privacy_from_db);
 		$stmt->execute();
 		if($stmt->fetch()){
@@ -172,7 +174,7 @@
 		return $photo_html;
 	}
 
-	function show_photo_alttext(){
+	/*function show_photo_alttext(){
 		$alt_text = null;
 		$conn = new mysqli($GLOBALS["server_host"], $GLOBALS["server_user_name"], $GLOBALS["server_password"], $GLOBALS["database"]);
 		$conn->set_charset("utf8");
@@ -189,9 +191,9 @@
 		$stmt->close();
 		$conn->close();
 		return $alt_text;
-	}
+	}*/
 	
-	function show_photo_privacy(){
+	/*function show_photo_privacy(){
 		$privacy = null;
 		$conn = new mysqli($GLOBALS["server_host"], $GLOBALS["server_user_name"], $GLOBALS["server_password"], $GLOBALS["database"]);
 		$conn->set_charset("utf8");
@@ -208,7 +210,7 @@
 		$stmt->close();
 		$conn->close();
 		return $privacy;
-	}
+	}*/
 	
 	function update_photo_data($alt_text, $privacy){
 		$notice = null;
@@ -216,12 +218,49 @@
 		$conn->set_charset("utf8");
 		$stmt = $conn->prepare("UPDATE vp_photos SET alttext = ?, privacy = ? WHERE id = ? AND userid = ? AND deleted IS NULL");
 		echo $conn->error;
-		$stmt->bind_param("siii", $alt_text, $privacy, $_GET["photo"], $_SESSION["user_id"]);
+		$stmt->bind_param("siii", $alt_text, $privacy, $_SESSION["photo"], $_SESSION["user_id"]);
 		echo $stmt->error;
 		if($stmt->execute()){
 			$notice = "Edukalt salvestatud!";
 		} else {
 			$notice = "Salvestamisel tekkis viga!" .$stmt->error;
+		}
+		$stmt->close();
+		$conn->close();
+		return $notice;
+	}
+	
+	function validate_user_photo($photo_id){
+		$alt_text = null;
+		$privacy = null;
+		$conn = new mysqli($GLOBALS["server_host"], $GLOBALS["server_user_name"], $GLOBALS["server_password"], $GLOBALS["database"]);
+		$conn->set_charset("utf8");
+		$stmt = $conn->prepare("SELECT alttext, privacy FROM vp_photos WHERE id = ? AND userid = ?");
+		echo $conn->error;
+		$stmt->bind_param("ii", $photo_id, $_SESSION["user_id"]);
+		$stmt->bind_result($alttext_from_db, $privacy_from_db);
+		$stmt->execute();
+		if($stmt->fetch()){
+			$alt_text = $alttext_from_db;
+			$privacy = $privacy_from_db;
+		}
+		$stmt->close();
+		$conn->close();
+		return [$alt_text, $privacy];
+	}
+	
+	function delete_photo($photo_id){
+		$notice = null;
+		$conn = new mysqli($GLOBALS["server_host"], $GLOBALS["server_user_name"], $GLOBALS["server_password"], $GLOBALS["database"]);
+		$conn->set_charset("utf8");
+		$stmt = $conn->prepare("UPDATE vp_photos SET deleted = NOW() WHERE id = ? AND userid = ?");
+		$stmt->bind_param("ii", $photo_id, $_SESSION["user_id"]);
+		echo $stmt->error;
+		echo $conn->error;
+		if($stmt->execute()){
+			$notice = "Foto edukalt kustutatud!";
+		} else {
+			$notice = "Tekkis viga: " .$stmt->error;
 		}
 		$stmt->close();
 		$conn->close();
