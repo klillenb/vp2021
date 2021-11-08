@@ -4,11 +4,53 @@
 		private $file_type;
 		private $my_temp_image;
 		private $my_new_temp_image;
+		public $error;
+		public $file_name;
 		
-		function __construct($photo, $type){
+		function __construct($photo){
 			$this->photo_to_upload = $photo;
-			$this->file_type = $type;//hiljem teeb klass selle ise kindlaks
-			$this->my_temp_image = $this->create_image_from_file($this->photo_to_upload["tmp_name"] ,$this->file_type);
+			$this->error = null;
+			$this->check_image();
+			if(empty($this->error)){
+				$this->my_temp_image = $this->create_image_from_file($this->photo_to_upload["tmp_name"] ,$this->file_type);
+			}
+		}
+		
+		function __destruct(){
+			if(isset($this->my_temp_image)){
+				imagedestroy($this->my_temp_image);
+			}
+		}
+		
+		//kas on pilt ja mis tüüpi?
+		private function check_image(){
+			$image_check = getimagesize($this->photo_to_upload["tmp_name"]);
+				if($image_check !== false){
+					if($image_check["mime"] == "image/jpeg"){
+						$this->file_type = "jpg";
+					}
+					if($image_check["mime"] == "image/png"){
+						$this->file_type = "png";
+					}
+					if($image_check["mime"] == "image/gif"){
+						$this->file_type = "gif";
+					}
+				} else {
+					$this->error = "Valitud fail ei ole pilt!";
+				}
+		}
+		
+		public function check_size($limit){
+            if(empty($this->error) and $this->photo_to_upload["size"] > $limit){
+                $this->error .= "Valitud fail on liiga suur!";
+            }
+            return $this->error;
+        }
+		
+		public function file_name($prefix){
+			//teen ajatempli
+			$time_stamp = microtime(1) * 10000;
+			$this->file_name = $prefix ."_" .$time_stamp ."." .$this->file_type;
 		}
 		
 		private function create_image_from_file($file, $file_type = "png"){
@@ -70,6 +112,57 @@
 			
 			//kopeerime vajalikud pikslid uude objekti
 			imagecopyresampled($this->my_new_temp_image, $this->my_temp_image, 0, 0, $cut_x, $cut_y, $new_w, $new_h, $cut_size_w, $cut_size_h);
+		}
+		
+		public function add_watermark($watermark_file){
+			$watermark = imagecreatefrompng($watermark_file);
+			$watermark_width = imagesx($watermark);
+			$watermark_height = imagesy($watermark);
+			$watermark_x = imagesx($this->my_new_temp_image) - $watermark_width - 10;
+			$watermark_y = imagesy($this->my_new_temp_image) - $watermark_height - 10;
+			imagecopy($this->my_new_temp_image, $watermark, $watermark_x, $watermark_y, 0, 0, $watermark_width, $watermark_height);
+			imagedestroy($watermark);
+		}
+		
+		public function save_image($target){
+			$notice = null;
+			
+			if($this->file_type == "jpg"){
+				if(imagejpeg($this->my_new_temp_image, $target, 90)){
+					$notice = "Vähendatud pildi salvestamine õnnestus!";
+				} else {
+					$notice = "Vähendatud pildi salvestamisel tekkis tõrge!";
+				}
+			}
+			
+			if($this->file_type == "png"){
+				if(imagepng($this->my_new_temp_image, $target, 6)){
+					$notice = "Vähendatud pildi salvestamine õnnestus!";
+				} else {
+					$notice = "Vähendatud pildi salvestamisel tekkis tõrge!";
+				}
+			}
+			
+			if($this->file_type == "gif"){
+				if(imagegif($this->my_new_temp_image, $target)){
+					$notice = "Vähendatud pildi salvestamine õnnestus!";
+				} else {
+					$notice = "Vähendatud pildi salvestamisel tekkis tõrge!";
+				}
+			}
+			
+			imagedestroy($this->my_new_temp_image);
+			return $notice;
+		}
+		
+		public function move_original_image($photo_orig_upload_dir){
+			$notice = null;
+			if(move_uploaded_file($this->photo_to_upload["tmp_name"], $target)){
+				$notice .= "Originaalfoto laeti üles!";
+			} else {
+				$notice .= "Foto üleslaadimine ei õnnestunud!";
+			}
+			return $notice;
 		}
 		
 	}//class lõppeb

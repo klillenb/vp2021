@@ -35,22 +35,7 @@
 	
 	if(isset($_POST["photo_submit"])){
 		if(isset($_FILES["photo_input"]["tmp_name"]) and !empty($_FILES["photo_input"]["tmp_name"])){
-			//kas on pilt ja mis tüüpi?
-			$image_check = getimagesize($_FILES["photo_input"]["tmp_name"]);
-			if($image_check !== false){
-				if($image_check["mime"] == "image/jpeg"){
-					$file_type = "jpg";
-				}
-				if($image_check["mime"] == "image/png"){
-					$file_type = "png";
-				}
-				if($image_check["mime"] == "image/gif"){
-					$file_type = "gif";
-				}
-			} else {
-				$photo_error = "Valitud fail ei ole pilt!";
-			}
-			
+
 			//kas on lubatud suurusega?
 			if(empty($photo_error) and $_FILES["photo_input"]["size"] > $photo_upload_size_limit){
 				$photo_error .= "Valitud fail on liiga suur!";
@@ -75,51 +60,31 @@
         
 			
 			if(empty($photo_error)){
-				//teen ajatempli
-				$time_stamp = microtime(1) * 10000;
+				//võtame kasutusele klassi, kuni klass ise tüüpi kindlaks ei tee, saadan failitüübi
+				$photo_upload = new Photoupload($_FILES["photo_input"]);
+				$photo_error .= $photo_upload->check_size($photo_upload_size_limit);
 				
 				//moodustan failinime, kasutame eesliidet
-				$file_name = $photo_filename_prefix ."_" .$time_stamp ."." .$file_type;
+				$photo_upload->file_name($photo_filename_prefix);
 				
-				//võtame kasutusele klassi, kuni klass ise tüüpi kindlaks ei tee, saadan failitüübi
-				$photo_upload = new Photoupload($_FILES["photo_input"], $file_type);
-				
-				//teen graafikaobjekti, image objekti
-				/*if($file_type == "jpg"){
-					$my_temp_image = imagecreatefromjpeg($_FILES["photo_input"]["tmp_name"]);
-				}
-				if($file_type == "png"){
-					$my_temp_image = imagecreatefrompng($_FILES["photo_input"]["tmp_name"]);
-				}
-				if($file_type == "gif"){
-					$my_temp_image = imagecreatefromgif($_FILES["photo_input"]["tmp_name"]);
-				}*/
-				
-				//loome uue pikslikogumi
-				//$my_new_temp_image = resize_image($my_temp_image, $normal_photo_max_width, $normal_photo_max_height);
 				$photo_upload->resize_image($normal_photo_max_width, $normal_photo_max_height);
 				
 				//lisan vesimärgi
-				add_watermark($my_new_temp_image, $watermark_file);
+				$photo_upload->add_watermark($watermark_file);
 				
-				$photo_upload_notice = "Vähendatud pildi " .save_image($my_new_temp_image, $file_type, $photo_normal_upload_dir .$file_name);
-				//$photo_upload_notice = save_image_to_db($file_name, $alt_text, $_POST["privacy_input"]);
-				imagedestroy($my_new_temp_image);
+
+				$photo_upload_notice = "Vähendatud pildi " .$photo_upload->save_image($photo_normal_upload_dir .$file_name);
 				
 				//teen pisipildi
-				$my_new_temp_image = resize_image($my_temp_image, $thumbnail_width, $thumbnail_height, false);
-                $photo_upload_notice .= " Pisipildi " .save_image($my_new_temp_image, $file_type, $photo_thumbnail_upload_dir .$file_name);
-                imagedestroy($my_new_temp_image);
+				$photo_upload->resize_image($thumbnail_width, $thumbnail_height);
+                $photo_upload_notice .= " Pisipildi " .$photo_upload->save_image($photo_thumbnail_upload_dir .$file_name);
 				
+				$photo_upload->move_original_image($photo_orig_upload_dir .$photo_upload->file_name);
 				
-				//kopeerime pildi originaalkujul, originaalnimega vajalikku kataloogi
-				if(move_uploaded_file($_FILES["photo_input"]["tmp_name"], $photo_orig_upload_dir .$file_name)){
-					$photo_upload_notice .= " Originaalfoto laeti üles!";
-				} else {
-					$photo_upload_notice .= " Foto üleslaadimine ei õnnestunud!";
-				}
-				
-				$photo_upload_notice .= " " .save_image_to_db($file_name, $alt_text, $privacy);
+				//kirjutame andmetabelisse
+				$photo_upload_notice .= " " .save_image_to_db($photo_upload->file_name, $alt_text, $privacy);
+				unset($photo_upload);
+			
 				$alt_text = null;
 				$privacy = 1;
 			}
