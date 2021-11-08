@@ -117,7 +117,7 @@
 			}
 			$gallery_html .= '" class="thumbs">' ."\n";
 			$gallery_html .= "</a> \n";
-			$gallery_html .= "<p>" .date_to_est_format($date) ."</p>";
+			$gallery_html .= "<p><b>Lisatud: </b>" .date_to_est_format($date) ."</p>";
 			$gallery_html .= "</div> \n";
 
 		}

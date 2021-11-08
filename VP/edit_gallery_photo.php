@@ -77,6 +77,7 @@
 		<br>
 		<input type="submit" name="photo_submit" value="Uuenda pildi andmeid">
 	</form>
+	<br>
 	<form method = "POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
 		<input type="submit" name="photo_delete" value="Kustuta foto">
 	</form>

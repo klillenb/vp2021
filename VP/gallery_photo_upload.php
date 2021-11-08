@@ -14,6 +14,8 @@
 	require_once("../../../config.php");
 	require_once("fnc_general.php");
 	require_once("fnc_photo_upload.php");
+	//fotode üleslaadimise klass
+	require_once("classes/Photoupload.class.php");
 
 	$photo_upload_notice = null;
 
@@ -79,8 +81,11 @@
 				//moodustan failinime, kasutame eesliidet
 				$file_name = $photo_filename_prefix ."_" .$time_stamp ."." .$file_type;
 				
+				//võtame kasutusele klassi, kuni klass ise tüüpi kindlaks ei tee, saadan failitüübi
+				$photo_upload = new Photoupload($_FILES["photo_input"], $file_type);
+				
 				//teen graafikaobjekti, image objekti
-				if($file_type == "jpg"){
+				/*if($file_type == "jpg"){
 					$my_temp_image = imagecreatefromjpeg($_FILES["photo_input"]["tmp_name"]);
 				}
 				if($file_type == "png"){
@@ -88,10 +93,13 @@
 				}
 				if($file_type == "gif"){
 					$my_temp_image = imagecreatefromgif($_FILES["photo_input"]["tmp_name"]);
-				}
-
-				$my_new_temp_image = resize_image($my_temp_image, $normal_photo_max_width, $normal_photo_max_height);
+				}*/
 				
+				//loome uue pikslikogumi
+				//$my_new_temp_image = resize_image($my_temp_image, $normal_photo_max_width, $normal_photo_max_height);
+				$photo_upload->resize_image($normal_photo_max_width, $normal_photo_max_height);
+				
+				//lisan vesimärgi
 				add_watermark($my_new_temp_image, $watermark_file);
 				
 				$photo_upload_notice = "Vähendatud pildi " .save_image($my_new_temp_image, $file_type, $photo_normal_upload_dir .$file_name);

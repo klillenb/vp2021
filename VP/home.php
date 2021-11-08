@@ -22,6 +22,16 @@
 	if(isset($_GET["add_films"])){
 		header("Location: add_films.php");
 	}
+	
+	//testime klassi
+	/*require_once("classes/Test.class.php");
+	$my_test_object = new Test(33);
+	echo "Avalik muutuja " .$my_test_object->non_secret_value;
+	//echo "Privaatne muutuja " .$my_test_object->secret_value;
+	//$my_test_object->multiply;
+	$my_test_object->reveal();
+	unset($my_test_object);*/
+	
 	require("page_header.php");
 ?>
 <!DOCTYPE html>
