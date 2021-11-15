@@ -26,10 +26,36 @@
 	}
 	
 	$to_head = '<link rel="stylesheet" type="text/css" href="style/gallery.css">' ."\n";
+	$to_head .= '<script src="javascript/modal.js" defer></script>' ."\n";
+	$to_head .= '<link rel="stylesheet" type="text/css" href="style/modal.css">' ."\n";
 	
 	require("page_header.php");
 ?>
 
+	<!--Modaalakna osa galerii jaoks-->
+	<div id="modalarea" class="modalarea">
+		<!--Sulgemisnupp-->
+		<span id="modalclose" class="modalclose">&times;</span>
+		<!--pildikoht-->
+		<div class="modalhorizontal">
+			<div class="modalvertical">
+				<p id="modalcaption"></p>
+				<img id="modalimg" src="pics/empty.png" alt="Galeriipilt">
+				<br>
+				<div id="rating" class="modalRating">
+					<input id="rate1" name="rating" type="radio" value="1"><label for="rate1">1</label>
+					<input id="rate2" name="rating" type="radio" value="2"><label for="rate1">2</label>
+					<input id="rate3" name="rating" type="radio" value="3"><label for="rate1">3</label>
+					<input id="rate4" name="rating" type="radio" value="4"><label for="rate1">4</label>
+					<input id="rate5" name="rating" type="radio" value="5"><label for="rate1">5</label>
+					<button id="storeRating" type="button">Salvesta hinnang</button>
+					<br>
+					<p id="avgRating"></p>
+				</div>
+			</div>
+		</div>
+	</div>
+	
 	<h1><?php echo $_SESSION["first_name"] ." " .$_SESSION["last_name"]; ?>, veebiprogrammeerimine</h1>
 		<p>See veebileht tehti <a href="https://www.tlu.ee/dt">Tallinna Ülikooli Digitehnoloogiate instituudi</a> veebiprogrammeerimise tunnis ja <em>ei sisalda tõsiseltvõetavat sisu</em>!</p>
 		<p><small>Loodetavasti saan serveriga ühendust</small></p>
@@ -41,6 +67,7 @@
 	</ul>
 	<hr>
 	<h2>Fotogalerii</h2>
+	
 	<p>
 		<?php
 			if($page > 1){
@@ -55,7 +82,9 @@
 			}
 		?>
 	</p>
-	<?php echo read_public_photo_thumbs($page_limit, $page);?>
+	<div id="gallery" class="gallery">
+		<?php echo read_public_photo_thumbs($page_limit, $page);?>
+	</div>
 	
 </body>
 </html>
