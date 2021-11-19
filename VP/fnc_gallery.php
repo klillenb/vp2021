@@ -66,9 +66,9 @@
 		$skip = ($page - 1) * $page_limit;
 		$conn = new mysqli($GLOBALS["server_host"], $GLOBALS["server_user_name"], $GLOBALS["server_password"], $GLOBALS["database"]);
 		$conn->set_charset("utf8");
-		$stmt = $conn->prepare("SELECT id, filename, alttext, created FROM vp_photos WHERE privacy >= ? AND deleted IS NULL ORDER BY id DESC LIMIT ?,?");
+		$stmt = $conn->prepare("SELECT vp_users.firstname, vp_users.lastname, vp_photos.id, vp_photos.filename, vp_photos.alttext, vp_photos.created FROM vp_photos JOIN vp_users ON vp_photos.userid = vp_users.id WHERE privacy >= ? AND deleted IS NULL ORDER BY id DESC LIMIT ?,?");
 		$stmt->bind_param("iii", $privacy, $skip, $page_limit);
-		$stmt->bind_result($id_from_db, $filename_from_db, $alttext_from_db, $date);
+		$stmt->bind_result($firsname_from_db, $lastname_from_db, $id_from_db, $filename_from_db, $alttext_from_db, $date);
 		$stmt->execute();
 		while($stmt->fetch()){
 			//<div class="thumbgallery">
@@ -82,7 +82,7 @@
 				$gallery_html .= $alttext_from_db;
 			}
 			$gallery_html .= '" class="thumbs" data-id="' .$id_from_db .'" data-fn="' .$filename_from_db .'">' ."\n";
-			$gallery_html .= "<p>" .date_to_est_format($date) ."</p>";
+			$gallery_html .= "<p>Laadis üles: ".$firsname_from_db ." ".$lastname_from_db ."<br>" .date_to_est_format($date) ."</p>";
 			$gallery_html .= "</div> \n";
 		}
 		if(empty($gallery_html)){

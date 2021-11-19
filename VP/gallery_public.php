@@ -44,10 +44,10 @@
 				<br>
 				<div id="rating" class="modalRating">
 					<input id="rate1" name="rating" type="radio" value="1"><label for="rate1">1</label>
-					<input id="rate2" name="rating" type="radio" value="2"><label for="rate1">2</label>
-					<input id="rate3" name="rating" type="radio" value="3"><label for="rate1">3</label>
-					<input id="rate4" name="rating" type="radio" value="4"><label for="rate1">4</label>
-					<input id="rate5" name="rating" type="radio" value="5"><label for="rate1">5</label>
+					<input id="rate2" name="rating" type="radio" value="2"><label for="rate2">2</label>
+					<input id="rate3" name="rating" type="radio" value="3"><label for="rate3">3</label>
+					<input id="rate4" name="rating" type="radio" value="4"><label for="rate4">4</label>
+					<input id="rate5" name="rating" type="radio" value="5"><label for="rate5">5</label>
 					<button id="storeRating" type="button">Salvesta hinnang</button>
 					<br>
 					<p id="avgRating"></p>
@@ -84,6 +84,7 @@
 	</p>
 	<div id="gallery" class="gallery">
 		<?php echo read_public_photo_thumbs($page_limit, $page);?>
+		<p id="avgRating"></p>
 	</div>
 	
 </body>
