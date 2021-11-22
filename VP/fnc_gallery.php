@@ -66,9 +66,9 @@
 		$skip = ($page - 1) * $page_limit;
 		$conn = new mysqli($GLOBALS["server_host"], $GLOBALS["server_user_name"], $GLOBALS["server_password"], $GLOBALS["database"]);
 		$conn->set_charset("utf8");
-		$stmt = $conn->prepare("SELECT vp_users.firstname, vp_users.lastname, vp_photos.id, vp_photos.filename, vp_photos.alttext, vp_photos.created FROM vp_photos JOIN vp_users ON vp_photos.userid = vp_users.id WHERE privacy >= ? AND deleted IS NULL ORDER BY id DESC LIMIT ?,?");
+		$stmt = $conn->prepare("SELECT vp_photos.id, filename, alttext, vp_photos.created, firstname, lastname, AVG(rating) as AvgValue FROM vp_photos JOIN vp_users ON vp_photos.userid = vp_users.id LEFT JOIN vp_photoratings ON vp_photoratings.photoid = vp_photos.id WHERE vp_photos.privacy >= ? AND deleted IS NULL GROUP BY vp_photos.id DESC LIMIT ?,?");
 		$stmt->bind_param("iii", $privacy, $skip, $page_limit);
-		$stmt->bind_result($firsname_from_db, $lastname_from_db, $id_from_db, $filename_from_db, $alttext_from_db, $date);
+		$stmt->bind_result($id_from_db, $filename_from_db, $alttext_from_db, $date, $firstname_from_db, $lastname_from_db, $avg_rating_from_db);
 		$stmt->execute();
 		while($stmt->fetch()){
 			//<div class="thumbgallery">
@@ -82,8 +82,16 @@
 				$gallery_html .= $alttext_from_db;
 			}
 			$gallery_html .= '" class="thumbs" data-id="' .$id_from_db .'" data-fn="' .$filename_from_db .'">' ."\n";
-			$gallery_html .= "<p>Laadis üles: ".$firsname_from_db ." ".$lastname_from_db ."<br>" .date_to_est_format($date) ."</p>";
-			$gallery_html .= "</div> \n";
+			$gallery_html .= "<p>" .$firstname_from_db ." ".$lastname_from_db ."<br> \n";
+			$gallery_html .= "Lisatud: " .date_to_est_format($date) ."</p> \n";
+			$gallery_html .= '<p id="rating' .$id_from_db .'">';
+			if(!empty($avg_rating_from_db)){
+				$gallery_html .= "Hinne: " .round($avg_rating_from_db, 2);
+			} else {
+				$gallery_html .= "Pole hinnatud";
+			}
+			$gallery_html .= "</p> \n";
+            $gallery_html .= "</div> \n";
 		}
 		if(empty($gallery_html)){
 			$gallery_html = "<p>Kahjuks avalikke fotosid üles laetud pole!</p> \n";

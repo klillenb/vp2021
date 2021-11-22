@@ -76,7 +76,7 @@
 	<h2>Veebiprogrammeerimise tunnis õpime järgnevat:</h2>
 	<ul>
 		<li>PHP programmeerimiskeel</li>
-		<li>HTML programmeerimiskeel</li>
+		<li>HTML märkimiskeel</li>
 		<li>SQL päringukeel</li>
 		<li>jne</li>
 	</ul>

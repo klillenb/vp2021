@@ -1,15 +1,6 @@
 <?php
 	//alustame sessiooni
-	session_start();
-	//kas on sisselogitud
-	if(!isset($_SESSION["user_id"])){
-		header("Location: page2.php");
-	}
-	//väljalogimine
-	if(isset($_GET["logout"])){
-		session_destroy();
-		header("Location: page2.php");
-	}
+	require_once("use_session.php");
 	
 	require_once("../../../config.php");
 	require_once("fnc_general.php");

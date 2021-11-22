@@ -1,6 +1,8 @@
 <?php
 	//alustame sessiooni
-	session_start();
+	//session_start();
+	require_once("classes/SessionManager.class.php");
+	SessionManager::sessionStart("vp", 0, "/~kertlil/vp2021/", "greeny.cs.tlu.ee");
 	require_once("fnc_user.php");
 	require_once("fnc_general.php");
 	require_once("../../../config.php");
@@ -11,6 +13,7 @@
 	$todays_evaluation = null; // $todays_evaluation="";
 	$inserted_adjective = null;
 	$adjective_error = null;
+	//var_dump($_COOKIE);
 	
 	$email = null;
 	$email_error = null;
