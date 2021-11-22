@@ -65,6 +65,7 @@
 		<li><a href="gallery_public.php">Sisselogitud kasutajate jaoks fotode galerii</a></li>
 		<li><a href="gallery_home.php">Minu oma fotogalerii</a></li>
 		<li><a href="user_profile.php">Kasutajaprofiil</a></li>
+		<li><a href="add_news.php">Uudise lisamine</a></li>
 		<li><a href="?logout=1">Logi välja</a></li>
 	</ul>
 	
