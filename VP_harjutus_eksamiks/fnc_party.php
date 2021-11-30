@@ -55,13 +55,13 @@
 		$stmt->execute();
 		if($stmt->fetch()){
 			$list_html .= "<p>Nimi: " .$first_name_from_db ." " .$last_name_from_db ."</p> \n";
-			$list_html .= "<p>üliõpilaskood. " .$student_code_from_db ."<p> \n";
-			$list_html .= '<input type="radio" name="payment_input" id="payment_input_1" value="1"';
+			$list_html .= "<p>üliõpilaskood: " .$student_code_from_db ."<p> \n";
+			$list_html .= '<input type="radio" name="payment_input" id="payment_input_1" value=1';
 			if(!empty($payment)){
 				$list_html .= " checked>";
 			}
 			$list_html .= '<label for="payment_input_1">Makstud</label><br>';
-			$list_html .= '<input type="radio" name="payment_input" id="payment_input_2" value="2"';
+			$list_html .= '<input type="radio" name="payment_input" id="payment_input_2" value=2';
 			if(empty($payment)){
 				$list_html .=" checked>";
 			}
@@ -83,7 +83,7 @@
 		$stmt->bind_result($id_from_db, $first_name_from_db, $last_name_from_db);
 		$stmt->execute();
 		while($stmt->fetch()){
-			$html .= '<option value="' .$id_from_db .'"';
+			$html .= '<option value=' .$id_from_db .'';
 			if($selected == $id_from_db){
 				$html .= " selected";
 			}
@@ -94,17 +94,37 @@
 		return $html;
 	}
 	
-	function save_payment_info($payment, $student_code){
+	function save_payment_info($selected_person, $payment){
 		$notice = null;
 		$conn = new mysqli($GLOBALS["server_host"], $GLOBALS["server_user_name"], $GLOBALS["server_password"], $GLOBALS["database"]);
 		$conn->set_charset("utf8");
-		$stmt = $conn->prepare("UPDATE vp_pidu SET payment = ? WHERE id = ? AND cancel IS NULL");
-		$stmt->bind_param("is", $payment, $student_code);
-		echo $stmt->error;
-		if($stmt->execute()){
-			$notice = "Salvestamine õnnestus!";
+		$stmt = $conn->prepare("SELECT payment FROM vp_pidu WHERE id = ?");
+		$stmt->bind_param("i", $selected_person);
+		$stmt->bind_result($payment_from_db);
+		$stmt->execute();
+		if($stmt->fetch()){
+			if(empty($payment_from_db)){
+				$stmt->close();
+				$stmt = $conn->prepare("INSERT INTO vp_pidu (payment) VALUES (?) WHERE id = ? AND cancel IS NULL");
+				echo $conn->error;
+				$stmt->bind_param("i", $payment);
+				if($stmt->execute()){
+					$notice = "Edukalt salvestatud!";
+				} else {
+					$notice = "Salvestamine ebaõnnestus!";
+				}
+			} else {
+				$stmt->close();
+				$stmt = $conn->prepare("UPDATE vp_pidu SET payment = ? WHERE id = ? AND cancel IS NULL");
+				$stmt->bind_param("ii", $payment, $selected_person);
+				if($stmt->execute()){
+					$notice = "Muutmine õnnestus!";
+				} else {
+					$notice = "Muutmine ebaõnnestus!";
+				}
+			}
 		} else {
-			$notice = "Salvestamine ebaõnnestus!";
+			$notice = "Tekkis viga: " .$stmt->error .$conn->error;
 		}
 		$stmt->close();
 		$conn->close();
