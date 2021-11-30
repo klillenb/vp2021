@@ -47,6 +47,21 @@
             return $this->error;
         }
 		
+		public function check_allowed_type($allowed_types){
+			$error = null;
+			$file_info = getimagesize($this->photo_to_upload["tmp_name"]);
+			if(isset($file_info["mime"])){
+				if(!in_array($file_info["mime"], $allowed_types)){
+					$error = "Valitud foto fail pole lubatud tüüi!";
+					$this->error = $error;
+				}
+			} else {
+				$error = "Valitud faili tüüpi ei õnnestu kontrollida!";
+				$this->error = $error;
+			}
+			return $error;
+		}
+		
 		public function file_name($prefix){
 			//teen ajatempli
 			$time_stamp = microtime(1) * 10000;

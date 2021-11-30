@@ -10,22 +10,25 @@
 	require_once("classes/Photoupload.class.php");
 	
 
-	$news_notice = $news_title = $news_content = null;
-	$news_photo = false;
+	$news_notice = null;
+	$news_title = null;
+	$news = null;
+	$news_error = null;
 	
 	//uudise aegumine
 	$expire = new DateTime("now");
 	$expire->add(new DateInterval("P7D"));
 	$expire_date = date_format($expire, "Y-m-d");
 	
+	$photo_file = null;
 	$photo_filename_prefix = "vpnews_";
 	$photo_upload_size_limit = 1024 * 1024;
+	$allowed_photo_types = ["image/jpeg", "image/png", "image/gif"];
 	
 
 	$normal_photo_max_height = 400;
 	$normal_photo_max_width = 600;
 	$thumbnail_width = $thumbnail_height = 100;
-	$photo_upload_notice = null;
 	
 	
 	if(isset($_POST["news_submit"])){
@@ -38,48 +41,47 @@
 		//$today = date("Y-m-d");
 		//SQL lauses	WHERE added >= ?
 		if(empty($_POST["title_input"])){
-			$news_notice = "Sisesta tiitel!";
+			$news_error = "Uudise pealkiri puudu!";
 		} else {
 			$news_title = test_input(filter_var($_POST["title_input"], FILTER_SANITIZE_STRING));
 		}
 		if(empty($_POST["news_input"])){
-			$news_notice .= " Uudise sisu puudu!";
+			$news_error .= " Uudise sisu on puudu!";
 		} else {
 			$news_content = test_input(filter_var($_POST["news_input"], FILTER_SANITIZE_STRING));
 		}
 		if(empty($_POST["expire_input"])){
-			$news_notice .= " Palun vali viimase esitamise kuupäev!";
+			$news_error .= " Palun vali viimase esitamise kuupäev!";
 		} else {
 			$expire_date = $_POST["expire_input"];
 		}
-		if(!empty($_POST["photo_input"])){
-			if(isset($_FILES["photo_input"]["tmp_name"]) and !empty($_FILES["photo_input"]["tmp_name"])){
-				$photo_upload = new Photouplaod($_FILES["photo_input"]);
-				$photo_upload->check_size($photo_upload_size_limit);
-				
-				//moodustan failinime, kasutame eesliidet
-				$photo_upload->file_name($photo_filename_prefix);
-				
-				$photo_upload->resize_image($normal_photo_max_width, $normal_photo_max_height);
-
-				$photo_upload_notice = "Vähendatud pildi " .$photo_upload->save_image($photo_normal_upload_dir .$file_name);
-				
-				//teen pisipildi
-				$photo_upload->resize_image($thumbnail_width, $thumbnail_height);
-				$photo_upload_notice .= " Pisipildi " .$photo_upload->save_image($photo_thumbnail_upload_dir .$file_name);
-				
-				$photo_upload->move_original_image($photo_orig_upload_dir .$photo_upload->file_name);
-					
-				//kirjutame andmetabelisse
-				$photo_upload_notice .= " " .save_news_image_to_db($photo_upload->file_name);
-				unset($photo_upload);
-				$news_photo = true;
-			}
+		if($expire_date < date("Y-m-d")){
+			$news_error .= " Aegumistähtaeg on minevikus!";
 		}
 		
-		if(empty($news_notice)){
-			$news_notice = upload_news($news_title, $news_content, $expire_date, $news_photo);
-			
+		//kas foto on valitud
+		if(isset($_FILES["photo_input"]["tmp_name"]) and !empty($_FILES["photo_input"]["tmp_name"])){
+			$photo_upload = new Photoupload($_FILES["photo_input"]);
+			if(empty($photo_upload->error)){
+				$photo_upload ->check_allowed_type($allowed_photo_types);
+				if(empty($photo_upload->error)){
+					$photo_upload->check_size($photo_upload_size_limit);
+					if(empty($photo_upload->error) and empty($news_error)){
+						$photo_upload->file_name($photo_filename_prefix);
+						$photo_upload->resize_image($normal_photo_max_width, $normal_photo_max_height);
+						$news_notice = "Uudise pildi " .$photo_upload->save_image($photo_news_upload_dir .$photo_upload->file_name);
+						$photo_file .= $photo_upload->file_name;
+						//echo $photo_file;
+					}
+				}
+			}
+			$news_error .= $photo_upload->error;
+			unset($photo_upload);
+		}
+
+		
+		if(empty($news_error)){
+			$news_notice = upload_news($news_title, $news, $expire_date, $photo_file);
 		}
 	}
 	

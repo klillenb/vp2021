@@ -2,6 +2,8 @@
 	//alustame sessiooni
 	//session_start();
 	require_once("use_session.php");
+	require_once("../../../config.php");
+	require_once("fnc_news.php");
 	//kas on sisselogitud
 	if(!isset($_SESSION["user_id"])){
 		header("Location: page2.php");
@@ -68,6 +70,9 @@
 		<li><a href="add_news.php">Uudise lisamine</a></li>
 		<li><a href="?logout=1">Logi välja</a></li>
 	</ul>
+	<br>
+	<h2>Uudised</h2>
+	<?php echo latest_news(5);?>
 	
 </body>
 </html>
