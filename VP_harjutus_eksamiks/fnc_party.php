@@ -3,10 +3,11 @@
 	
 	function register_to_party($first_name, $last_name, $student_code){
 		$notice = null;
+		$payment = 2;
 		$conn = new mysqli($GLOBALS["server_host"], $GLOBALS["server_user_name"], $GLOBALS["server_password"], $GLOBALS["database"]);
 		$conn->set_charset("utf8");
-		$stmt = $conn->prepare("INSERT INTO vp_pidu (first_name, last_name, student_code) VALUES (?,?,?)");
-		$stmt->bind_param("ssii", $first_name, $last_name, $student_code);
+		$stmt = $conn->prepare("INSERT INTO vp_pidu (first_name, last_name, student_code, payment) VALUES (?,?,?,?)");
+		$stmt->bind_param("sssi", $first_name, $last_name, $student_code, $payment);
 		echo $stmt->error;
 		if($stmt->execute()){
 			$notice = "Registreerimine õnnestus!";
