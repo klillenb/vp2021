@@ -20,6 +20,7 @@
 	
 	if(isset($_POST["payment_submit"])){
 		if(isset($_POST["payment_input"]) and !empty($_POST["payment_input"])){
+			$selected_person = filter_var($_POST["person_input"], FILTER_VALIDATE_INT);
 			$notice = save_payment_info($selected_person, $_POST["payment_input"]);
 		}
 	}

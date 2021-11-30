@@ -29,7 +29,7 @@
 		$list_html .= "<ol> \n";
 		while($stmt->fetch()){
 			$list_html .= "<li>" .$first_name_from_db ." " .$last_name_from_db;
-			if(empty($payment)){
+			if(empty($payment) or $payment == 2){
 				$list_html .= ", <strong>maksmata</strong></li> \n";
 			} else {
 				$list_html .= ", <strong>makstud</strong></li> \n";
@@ -57,12 +57,12 @@
 			$list_html .= "<p>Nimi: " .$first_name_from_db ." " .$last_name_from_db ."</p> \n";
 			$list_html .= "<p>üliõpilaskood: " .$student_code_from_db ."<p> \n";
 			$list_html .= '<input type="radio" name="payment_input" id="payment_input_1" value=1';
-			if(!empty($payment)){
+			if($payment == 1){
 				$list_html .= " checked>";
 			}
 			$list_html .= '<label for="payment_input_1">Makstud</label><br>';
 			$list_html .= '<input type="radio" name="payment_input" id="payment_input_2" value=2';
-			if(empty($payment)){
+			if($payment == 2 or !empty($payment)){
 				$list_html .=" checked>";
 			}
 			$list_html .= '<label for="payment_input_2">Maksmata</label><br>';
@@ -98,36 +98,53 @@
 		$notice = null;
 		$conn = new mysqli($GLOBALS["server_host"], $GLOBALS["server_user_name"], $GLOBALS["server_password"], $GLOBALS["database"]);
 		$conn->set_charset("utf8");
-		$stmt = $conn->prepare("SELECT payment FROM vp_pidu WHERE id = ?");
-		$stmt->bind_param("i", $selected_person);
-		$stmt->bind_result($payment_from_db);
-		$stmt->execute();
-		if($stmt->fetch()){
-			if(empty($payment_from_db)){
-				$stmt->close();
-				$stmt = $conn->prepare("INSERT INTO vp_pidu (payment) VALUES (?) WHERE id = ? AND cancel IS NULL");
-				echo $conn->error;
-				$stmt->bind_param("i", $payment);
-				if($stmt->execute()){
-					$notice = "Edukalt salvestatud!";
-				} else {
-					$notice = "Salvestamine ebaõnnestus!";
-				}
-			} else {
-				$stmt->close();
-				$stmt = $conn->prepare("UPDATE vp_pidu SET payment = ? WHERE id = ? AND cancel IS NULL");
-				$stmt->bind_param("ii", $payment, $selected_person);
-				if($stmt->execute()){
-					$notice = "Muutmine õnnestus!";
-				} else {
-					$notice = "Muutmine ebaõnnestus!";
-				}
-			}
+		$stmt = $conn->prepare("UPDATE vp_pidu SET payment = ? WHERE id = ? AND cancel IS NULL");
+		$stmt->bind_param("ii", $payment, $selected_person);
+		if($stmt->execute()){
+			$notice = "Edukalt salvestatud!";
 		} else {
 			$notice = "Tekkis viga: " .$stmt->error .$conn->error;
 		}
 		$stmt->close();
 		$conn->close();
 		return $notice;
+	}
+	
+	function read_attending_people(){
+		$notice = null;
+		$conn = new mysqli($GLOBALS["server_host"], $GLOBALS["server_user_name"], $GLOBALS["server_password"], $GLOBALS["database"]);
+		$conn->set_charset("utf8");
+		$stmt = $conn->prepare("SELECT COUNT(id) FROM vp_pidu WHERE cancel IS NULL");
+		$stmt->bind_result($attending_amount);
+		$stmt->execute();
+		$stmt->fetch();
+		$stmt->close();
+		$stmt = $conn->prepare("SELECT COUNT(payment) FROM vp_pidu WHERE payment=1 AND cancel IS NULL");
+		$stmt->bind_result($paid_amount);
+		$stmt->execute();
+		if($stmt->fetch()){
+			$notice = $attending_amount ." peolist, kellest " .$paid_amount ." tuleb kindlasti!";
+		} else {
+			$notice = "Tekkis viga: " .$stmt->error;
+		}
+		$stmt->close();
+		$conn->close();
+		return $notice;
+	}
+	
+	function cancel_registration($student_code){
+		$response = null;
+		$conn = new mysqli($GLOBALS["server_host"], $GLOBALS["server_user_name"], $GLOBALS["server_password"], $GLOBALS["database"]);
+		$conn->set_charset("utf8");
+		$stmt = $conn->prepare("UPDATE vp_pidu SET cancel = NOW() WHERE student_code = ?");
+		$stmt->bind_param("s", $student_code);
+		if($stmt->execute()){
+			$response = "Edukalt tühistatud!";
+		} else {
+			$response = "Tekkis viga: " .$stmt->error;
+		}
+		$stmt->close();
+		$conn->close();
+		return $response;
 	}
 ?>

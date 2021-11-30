@@ -39,6 +39,7 @@
 <body>
 	<h1>Peole registreerimine</h1>
 	<p>Siin saad end peole registreerida, toimumiskoht ja -aeg on veel selgitamisel!</p>
+	<p>Hetkel on registreerunud: <?php echo read_attending_people();?></p>
 	<hr>
 	
 	<h3>Registreeri ennast peole:</h3>
