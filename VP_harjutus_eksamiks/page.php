@@ -9,12 +9,12 @@
 		if(empty($_POST["first_name_input"])){
 			$notice = "Eesnimi sisestamata!";
 		} else {
-			$first_name = $_POST["first_name_input"];
+			$first_name = filter_var($_POST["first_name_input"], FILTER_SANITIZE_STRING);
 		}
 		if(empty($_POST["surname_input"])){
 			$notice .= " Perekonnanimi sisestamata!";
 		} else {
-			$last_name = $_POST["surname_input"];
+			$last_name = filter_var($_POST["surname_input"], FILTER_SANITIZE_STRING);
 		}
 		if(isset($_POST["student_code_input"])){
 			if(empty($_POST["student_code_input"])){
@@ -22,11 +22,14 @@
 			} else if(strlen($_POST["student_code_input"]) != 6) {
 				$notice .= " Sisestasid vale koodi!";
 			}
-			$student_code = $_POST["student_code_input"];
+			$student_code = filter_var($_POST["student_code_input"], FILTER_SANITIZE_STRING);
 		}
 		
 		if(empty($notice)){
 			$notice = register_to_party($first_name, $last_name, $student_code);
+			$first_name = null;
+			$last_name = null;
+			$student_code = null;
 		}
 	}
 ?>
