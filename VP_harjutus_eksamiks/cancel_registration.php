@@ -21,7 +21,7 @@
 <body>
 	<h1>Registreerimise tühistamine</h1>
 	<p>Siin saad enda registreerimise tühistada</p>
-	<h3>Registreeri ennast peole:</h3>
+	<h3>Tühista enda registreerimine:</h3>
 		
 	<form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
 	  <label for="student_code_input">Üliõpilaskood:</label><br>
